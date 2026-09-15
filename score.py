@@ -144,11 +144,12 @@ def main():
     if not models:
         print("No model folders in newsbench/ocr-results/. Run run_newspaper_ocr.py first.")
         return
+    tier_names = sorted(set(tiers.values())) or ["all"]
     extra = f" {'aln':>6s}" if args.aligned else ""
-    print(f"{'model':28s} {'overall':>8s} {'full_page':>10s} {'article':>8s} "
-          f"{'chrF':>6s} {'bowF1':>6s} {'gap':>6s}{extra}  n")
+    hdr = f"{'model':26s} {'overall':>8s} " + " ".join(f"{t:>11s}" for t in tier_names)
+    print(hdr + f" {'chrF':>6s} {'bowF1':>6s} {'gap':>6s}{extra}  n")
     for m in models:
-        by = {"full_page": [], "article": []}
+        by = {t: [] for t in tier_names}
         allc, fs, bows, alns = [], [], [], []
         for ref_file in sorted(REF.glob("*.txt")):
             hyp_file = m / ref_file.name
@@ -157,7 +158,8 @@ def main():
             rtext = ref_file.read_text(encoding="utf-8", errors="ignore")
             htext = hyp_file.read_text(encoding="utf-8", errors="ignore")
             allc.append(cer(rtext, htext))
-            by.get(tiers.get(ref_file.stem, "article"), by["article"]).append(allc[-1])
+            t = tiers.get(ref_file.stem, tier_names[0])
+            by.setdefault(t, []).append(allc[-1])
             fs.append(chrf(rtext, htext))
             bows.append(bow_f1(rtext, htext))
             if args.aligned:
@@ -165,9 +167,9 @@ def main():
         acc = lambda xs: (1 - sum(xs) / len(xs)) if xs else float("nan")
         mean = lambda xs: (sum(xs) / len(xs)) if xs else float("nan")
         ov, bf = acc(allc), mean(bows)
+        tiercols = " ".join(f"{acc(by[t]):11.3f}" for t in tier_names)
         tail = f" {mean(alns):6.3f}" if args.aligned else ""
-        print(f"{m.name:28s} {ov:8.3f} {acc(by['full_page']):10.3f} "
-              f"{acc(by['article']):8.3f} {mean(fs):6.3f} {bf:6.3f} "
+        print(f"{m.name:26s} {ov:8.3f} {tiercols} {mean(fs):6.3f} {bf:6.3f} "
               f"{bf - ov:6.3f}{tail}  {len(allc)}")
 
 

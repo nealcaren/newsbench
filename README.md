@@ -14,36 +14,42 @@ conventions, but it is self-contained: everything needed to score a model lives 
 
 ## Corpus
 
-Forty genuine newspaper pages drawn from Library of Congress
+Nineteen **complete, long, original newspaper pages** drawn from Library of Congress
 [By the People](https://crowd.loc.gov/) crowd-transcribed collections, so every page
-ships with a volunteer gold-standard transcription. Pages were selected to be **clean,
-full newspaper pages** — no scrapbook/collage pages of pasted clippings (whose ambiguous
-reading order makes CER unfair) and no short snippets. None appear in the InkBench
+ships with a volunteer gold-standard transcription. None appear in the InkBench
 400-image benchmark, so the two measures are independent.
 
 | Property | Value |
 |:---|:---|
-| Pages | 40 |
-| Collections | 7 (NAWSA, Blackwell family, Mary Church Terrell, Carrie Chapman Catt, Anna E. Dickinson, Truly Douglass, Early Copyright) |
-| Publications | ~25 distinct titles (The Liberator, New-York Daily Tribune, The Woman's Journal / Woman Citizen, Providence Journal, Des Moines Register, Christian Register, Unity, Democratic Digest, The Evening Star, Washington Afro-American, The Jewish Advocate, Morning Express, …) |
-| Eras | 1850s abolitionist broadsheets through 1940s political weeklies |
-| Words per page | 861 – 8,966 (median ≈ 2,090) |
-| Total gold words | ~97,600 |
-| Tiers | 27 `full_page` (1,500+ words), 13 `article` (600–1,499 words) |
+| Pages | 19 |
+| Publications | ~13 distinct papers (The Liberator, Boston Daily Advertiser, Hartford Daily Courant, Des Moines Register & Leader, Providence Sunday Journal, Anti-Suffrage Notes, Maine Anti-Suffragist, Industrial Equality, an Oberlin college paper, a 1898 Indianapolis paper, and others) |
+| Eras | 1850s abolitionist broadsheets through 1919 |
+| Words per page | 1,892 – 8,966 (median ≈ 3,300) |
+| Total gold words | ~76,600 |
+| Every page | a complete edge-to-edge printed page, not a clipping or excerpt |
 
-The 4,700–9,000-word pages are 19th-century *Liberator*-era broadsheets — the hardest
-tier, with very small type and six-plus columns.
+**Selection.** Each page was verified *by eye* to be a true full newspaper page — a
+complete printed sheet with columns running edge to edge — and required to carry a long
+gold transcription (≥ ~1,900 words). The length floor is deliberate: NewsBench targets
+models that can sustain a full-page, multi-column transcription, and it doubles as a
+filter against *partial* gold (volunteers who transcribed only part of a dense page).
 
-> **Note on sourcing.** Roughly half the pages come from the NAWSA (suffrage) collection,
-> but that collection is itself a scrapbook of many different newspapers, so the pages
-> still span ~25 publications and a century of layout conventions.
+> **Note on sourcing — read this before citing coverage.** These pages were mined from
+> personal-papers collections (mostly the NAWSA suffrage records), which are dominated by
+> *clippings*, not full sheets. Genuine full newspaper pages are rare there, and the
+> Library's *By the People* program has **no dedicated newspaper campaign** to draw from —
+> every published transcription dataset is manuscripts, letters, or diaries. So while the
+> 19 pages span ~13 real newspapers and seven decades, they were all captured inside
+> suffrage-era collections and skew abolitionist/suffrage in subject; several are pages of
+> the same *Liberator* issues. This is the realistic ceiling for *gold-transcribed* full
+> newspaper pages in the LoC crowd archive, not a balanced sample of American newspapers.
 
 ## Files
 
 ```
 images/            page scans (<id>.jpg), original LoC filenames
 txt/               matching volunteer gold transcriptions (<id>.txt)
-newsbench.csv      manifest: image_name, collection, words, tier, description
+newsbench.csv      manifest: image_name, collection, words, tier, newspaper_note
 ocr-results/       one folder per system: <model-name>/<id>.txt
 run_newspaper_ocr.py   runner for the newspaper-ocr pipeline
 score.py           scorer (recognition + reading-order metrics)
@@ -95,20 +101,16 @@ hard-aborts on MPS, and GLM-OCR needs an MLX/vLLM server (vLLM does not run on m
 
 ### Baseline results (`newspaper-ocr`)
 
-Higher is better. `overall` = 1 − CER; see the table above for the rest.
+Higher is better. `overall` = 1 − CER; `chrF`/`bowF1` are order-robust; `gap = bowF1 −
+overall` is the reading-order penalty. _Being regenerated on the corrected 19-page set;
+numbers land here when the runs finish._
 
-| Backend | overall | full_page | article | chrF | bowF1 | gap |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| `news_combo_fast` (fine-tuned Tesseract) | **0.564** | 0.551 | 0.590 | 0.659 | 0.682 | 0.119 |
-| `tesseract` default (AS YOLO + Tesseract) | 0.557 | 0.556 | 0.559 | 0.676 | 0.679 | 0.123 |
-| `lightonocr-cpu` (LightOnOCR-2-1B VLM) | 0.481\* | 0.493\* | 0.460\* | 0.597\* | 0.655\* | 0.174\* |
-
-\* VLM row is a partial run at time of writing; it will be refreshed on the full 40 pages.
-
-**Reading it.** All three land near ~0.66 on order-free `bowF1` — recognition quality is
-close. They separate mostly on the `gap` (reading order) and on a coverage/precision
-trade-off: the VLM has the highest word precision (cleanest text) but the lowest recall
-(it drops whole regions on the densest pages, likely per-region token-limit truncation).
+**Reading it (from the prior run).** All backends landed close on order-free `bowF1`
+(~0.66) — recognition quality is similar. They separate on the reading-order `gap` and on
+a coverage/precision trade-off: the LightOnOCR VLM had the highest word precision
+(cleanest text) but the lowest recall (it drops whole regions on the densest pages, likely
+per-region token-limit truncation). Expect the same shape but lower absolute scores on
+this set, since every page here is now a hard, long, dense full page.
 The gap of ~0.12–0.17 everywhere confirms that on multi-column newspapers, **sequencing
 is a bigger error source than character recognition** — which is the whole point of this
 benchmark.
