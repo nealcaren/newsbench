@@ -93,24 +93,44 @@ NPO=/path/to/newspaper-ocr/.venv/bin/python
 
 $NPO run_newspaper_ocr.py --name tesseract-default                        # AS YOLO + Tesseract
 $NPO run_newspaper_ocr.py --name news_combo_fast --model news_combo_fast  # bundled fine-tuned
-$NPO run_newspaper_ocr.py --name lightonocr-cpu --recognizer lightonocr --device cpu  # 1B VLM
+$NPO run_newspaper_ocr.py --name glm-ocr-mlx --recognizer glm-ocr         # GLM-OCR VLM via MLX server
 ```
 
-`--device cpu` is required for the VLM backends on Apple Silicon: LightOnOCR (mistral3-based)
-hard-aborts on MPS, and GLM-OCR needs an MLX/vLLM server (vLLM does not run on macOS).
+The GLM-OCR VLM runs in the pipeline's default `api` mode against a local
+[MLX](https://github.com/ml-explore/mlx) server (Apple-Silicon-native):
 
-### Baseline results (`newspaper-ocr`)
+```bash
+pip install mlx-vlm
+python -m mlx_vlm.server --model mlx-community/GLM-OCR-bf16 --port 8080
+```
 
-Higher is better. `overall` = 1 − CER; `chrF`/`bowF1` are order-robust; `gap = bowF1 −
-overall` is the reading-order penalty. _Being regenerated on the corrected 19-page set;
-numbers land here when the runs finish._
+On Apple Silicon this is the practical VLM path — GLM-OCR is ~1.1B params, and MLX uses the
+Metal GPU. The PyTorch VLM backends do **not** work well here: LightOnOCR (mistral3-based)
+hard-aborts on MPS and is ~6× slower on CPU, and GLM-OCR's own `local` mode falls back to
+CPU (it disables MPS due to vision-position-id bugs). vLLM does not run on macOS.
 
-**Reading it (from the prior run).** All backends landed close on order-free `bowF1`
-(~0.66) — recognition quality is similar. They separate on the reading-order `gap` and on
-a coverage/precision trade-off: the LightOnOCR VLM had the highest word precision
-(cleanest text) but the lowest recall (it drops whole regions on the densest pages, likely
-per-region token-limit truncation). Expect the same shape but lower absolute scores on
-this set, since every page here is now a hard, long, dense full page.
+### Baseline results (`newspaper-ocr`, 19 pages)
+
+Higher is better. `overall` = 1 − CER (order-sensitive); `chrF` and `bowF1` are order-robust;
+`gap = bowF1 − overall` is the reading-order / segmentation penalty. `broadsheet` = pages
+≥ 4000 gold words, `page` = the rest.
+
+| Backend | overall | broadsheet | page | chrF | bowF1 | gap |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `tesseract` default (AS YOLO + Tesseract) | **0.615** | 0.579 | 0.646 | 0.692 | 0.704 | 0.089 |
+| `glm-ocr-mlx` (GLM-OCR 1.1B VLM) | 0.614 | 0.576 | 0.648 | 0.689 | **0.760** | 0.146 |
+| `news_combo_fast` (fine-tuned Tesseract) | 0.606 | 0.576 | 0.632 | 0.666 | 0.695 | 0.089 |
+
+**Reading it.** On the headline CER (`overall`) all three tie at ~0.61 — by that metric the
+VLM does *not* beat Tesseract. But the split reveals why: on order-free `bowF1`, **GLM-OCR
+leads by ~5–6 points (0.760 vs ~0.70)** — it genuinely recognizes the words better. It gives
+that advantage back to reading order — its `gap` is 0.146 vs Tesseract's 0.089 — because the
+layout stage stitches the VLM's regions into the wrong sequence more often. So on these dense
+multi-column pages the VLM's bottleneck is **layout / reading order, not character
+recognition**, which is exactly the distinction the `chrF`/`bowF1`/`gap` columns exist to
+surface. Dense broadsheets (≥4000 words) cost every backend ~7 points versus shorter pages.
+
+_(A LightOnOCR-2-1B run was attempted but is CPU-only and ~6× slower here; not included.)_
 The gap of ~0.12–0.17 everywhere confirms that on multi-column newspapers, **sequencing
 is a bigger error source than character recognition** — which is the whole point of this
 benchmark.
