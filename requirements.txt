@@ -1,0 +1,7 @@
+# Scoring is stdlib-only, but these make it fast and enable extra metrics.
+rapidfuzz>=3.0    # fast edit distance for CER / chrF / bowF1
+scipy>=1.10       # only needed for `score.py --aligned` (block-aligned CER)
+
+# The runner (run_newspaper_ocr.py) additionally requires the newspaper-ocr
+# package and is meant to be run with that project's interpreter:
+#   https://github.com/nealcaren/newspaper-ocr
