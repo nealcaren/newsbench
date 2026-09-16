@@ -1,0 +1,12 @@
+{
+  "model": "qwen/qwen3.8-flash",
+  "config": "wholepage",
+  "pages": 19,
+  "elapsed_s": 4050.5,
+  "requests": 16,
+  "prompt_tokens": 31929,
+  "completion_tokens": 80352,
+  "total_tokens": 112281,
+  "cached_prompt_tokens": 2432,
+  "reported_cost": 0.02788846038
+}

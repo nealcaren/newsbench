@@ -1,0 +1,12 @@
+{
+  "model": "qwen/qwen3.8-flash",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 1390.6,
+  "requests": 997,
+  "prompt_tokens": 385298,
+  "completion_tokens": 215766,
+  "total_tokens": 601064,
+  "cached_prompt_tokens": 1152,
+  "reported_cost": 0.15450548058
+}

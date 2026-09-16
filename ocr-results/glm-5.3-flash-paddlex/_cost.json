@@ -1,0 +1,12 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 2927.4,
+  "requests": 1025,
+  "prompt_tokens": 435537,
+  "completion_tokens": 218219,
+  "total_tokens": 653756,
+  "cached_prompt_tokens": 5632,
+  "reported_cost": 0.13179321049949996
+}

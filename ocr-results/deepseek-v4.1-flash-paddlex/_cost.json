@@ -1,0 +1,12 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 1812.7,
+  "requests": 1023,
+  "prompt_tokens": 320601,
+  "completion_tokens": 565761,
+  "total_tokens": 886362,
+  "cached_prompt_tokens": 420,
+  "reported_cost": 0.5180521202999995
+}

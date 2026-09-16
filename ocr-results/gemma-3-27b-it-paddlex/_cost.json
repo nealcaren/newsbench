@@ -1,0 +1,12 @@
+{
+  "model": "google/gemma-3-27b-it",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 1407.7,
+  "requests": 1021,
+  "prompt_tokens": 308342,
+  "completion_tokens": 124086,
+  "total_tokens": 432428,
+  "cached_prompt_tokens": 0,
+  "reported_cost": 0.06268860773999996
+}

@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-2603",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 400.3,
+  "requests": 1021,
+  "prompt_tokens": 422568,
+  "completion_tokens": 118448,
+  "total_tokens": 541016,
+  "cached_prompt_tokens": 192,
+  "reported_cost": 0.1342699058249998
+}

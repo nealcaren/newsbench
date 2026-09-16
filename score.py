@@ -132,6 +132,17 @@ def load_tiers():
     return tiers
 
 
+def load_excludes():
+    """Stems flagged `exclude` in the manifest (e.g. partial/faulty gold) — skipped
+    for every model so the comparison stays fair."""
+    ex = set()
+    if MANIFEST.exists():
+        for row in csv.DictReader(open(MANIFEST)):
+            if (row.get("exclude") or "").strip():
+                ex.add(Path(row["image_name"]).stem)
+    return ex
+
+
 def main():
     import argparse
     ap = argparse.ArgumentParser()
@@ -140,6 +151,7 @@ def main():
     args = ap.parse_args()
 
     tiers = load_tiers()
+    excludes = load_excludes()
     models = sorted(p for p in RESULTS.glob("*") if p.is_dir()) if RESULTS.exists() else []
     if not models:
         print("No model folders in newsbench/ocr-results/. Run run_newspaper_ocr.py first.")
@@ -152,6 +164,8 @@ def main():
         by = {t: [] for t in tier_names}
         allc, fs, bows, alns = [], [], [], []
         for ref_file in sorted(REF.glob("*.txt")):
+            if ref_file.stem in excludes:
+                continue
             hyp_file = m / ref_file.name
             if not hyp_file.exists():
                 continue

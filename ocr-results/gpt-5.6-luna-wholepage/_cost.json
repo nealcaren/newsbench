@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-5.6-luna",
+  "config": "wholepage",
+  "pages": 19,
+  "elapsed_s": 283.8,
+  "requests": 31,
+  "prompt_tokens": 848408,
+  "completion_tokens": 133143,
+  "total_tokens": 981551,
+  "cached_prompt_tokens": 515089,
+  "reported_cost": 0.0
+}

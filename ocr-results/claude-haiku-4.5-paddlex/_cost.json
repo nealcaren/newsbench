@@ -1,0 +1,12 @@
+{
+  "model": "anthropic/claude-haiku-4.5",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 917.9,
+  "requests": 1025,
+  "prompt_tokens": 406457,
+  "completion_tokens": 134382,
+  "total_tokens": 540839,
+  "cached_prompt_tokens": 0,
+  "reported_cost": 1.0644727500000026
+}

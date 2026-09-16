@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-5.6-luna",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 2902.6,
+  "requests": 1019,
+  "prompt_tokens": 398138,
+  "completion_tokens": 723904,
+  "total_tokens": 1122042,
+  "cached_prompt_tokens": 0,
+  "reported_cost": 0.000241164
+}

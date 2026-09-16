@@ -1,0 +1,12 @@
+{
+  "model": "mistralai/mistral-small-2603",
+  "config": "wholepage",
+  "pages": 19,
+  "elapsed_s": 1274.1,
+  "requests": 53,
+  "prompt_tokens": 135226,
+  "completion_tokens": 112627,
+  "total_tokens": 247853,
+  "cached_prompt_tokens": 0,
+  "reported_cost": 0.09134131050000001
+}

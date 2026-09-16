@@ -146,6 +146,13 @@ InkBench mix: dense newspaper layout is genuinely harder.
   unfairly punishes any OCR tool; one such page was removed during construction. A quick
   screen: a strong backend emitting far more text than the gold flags a likely partial
   gold rather than a bad transcription.
+- Pages with a known-bad gold are flagged `exclude` in `newsbench.csv` and skipped by
+  `score.py` for every model (kept in `images/`+`txt/` for provenance). Currently
+  excluded: **`mss3413201856-40`** (Boston Daily Advertiser) — the gold ends mid-ad and
+  covers only ~half the page; all four OCR backends recover ~1.9× its word count of real,
+  coherent text. Cross-checking the gold word count against the independent OCR consensus
+  (`overall`/word-count outliers) is how such pages are found. Scores are therefore over
+  **18** pages.
 
 ## Scoring another system
 
