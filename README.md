@@ -162,6 +162,12 @@ the image stem), then run `python score.py`. It auto-discovers every folder unde
 
 ## License / provenance
 
-Images and transcriptions are U.S. Library of Congress *By the People* materials
-(public domain in the United States). See each source collection on
-[crowd.loc.gov](https://crowd.loc.gov/).
+The code in this repository (scoring scripts, harness, configuration) is released
+under the [MIT License](LICENSE).
+
+The page scans in `images/` and the gold transcriptions in `txt/` are U.S. Library
+of Congress *By the People* materials — the scans are public domain and the
+volunteer transcriptions are released into the public domain (CC0). No additional
+copyright is asserted over these files here; please credit the Library of Congress
+*By the People* program ([crowd.loc.gov](https://crowd.loc.gov/)) when reusing the
+corpus.

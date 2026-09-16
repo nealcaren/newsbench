@@ -19,18 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Corpus / data note
-
-The MIT license above covers the code in this repository (scoring scripts,
-harness, and configuration).
-
-The page scans in `images/` and the gold transcriptions in `txt/` are drawn from
-the Library of Congress "By the People" (crowd.loc.gov) crowdsourced
-transcription program. The underlying newspaper scans are Library of Congress
-materials in the public domain, and the volunteer transcriptions are released by
-the Library into the public domain (CC0). No additional copyright is asserted
-over these files by this repository. Please credit the Library of Congress "By
-the People" program when reusing the corpus.
