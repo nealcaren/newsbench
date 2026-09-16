@@ -19,6 +19,9 @@ as_yolo) to match the library default; PP-DocLayout is the recommended detector
 for dense newspaper pages. `--region-repair` runs the post-recognition
 `RegionRepair` pass (lossless dedup, container-split with strip re-OCR,
 fragmented-ad merge) — it needs a region-level recognizer (e.g. glm-ocr).
+`--residual-ocr` runs the residual second pass (mask the detected boxes, then
+re-OCR the leftover ink) to recover blocks the detector never proposed — also
+needs a region-level recognizer, and composes with `--region-repair`.
 """
 import argparse, time
 from pathlib import Path
@@ -40,6 +43,9 @@ def main():
                     help="tesseract (default) | glm-ocr | paddleocr-vl | lightonocr | kraken | ...")
     ap.add_argument("--model", default=None, help="recognizer_model, e.g. news_combo_fast")
     ap.add_argument("--spell-check", action="store_true")
+    ap.add_argument("--no-layout-processing", action="store_true",
+                    help="disable the harness LayoutProcessor (low-conf rescue, column-gap "
+                         "fill, dedup, block merge) — raw detector boxes -> recognizer")
     ap.add_argument("--device", default=None,
                     help="force device for VLM backends: cpu/mps/cuda (mps can crash)")
     # Recovery ladder (region-level recognizers only) — see newspaper-ocr README.
@@ -50,6 +56,9 @@ def main():
     ap.add_argument("--region-repair", action="store_true",
                     help="post-recognition RegionRepair pass (dedup + container-split + "
                          "ad-merge); needs a region-level recognizer")
+    ap.add_argument("--residual-ocr", action="store_true",
+                    help="residual second-pass: mask detected boxes, re-OCR leftover "
+                         "ink to recover detector misses; needs a region-level recognizer")
     ap.add_argument("--limit", type=int, default=0, help="only first N images (debug)")
     args = ap.parse_args()
 
@@ -59,6 +68,7 @@ def main():
         "detector": args.detector,
         "spell_check": args.spell_check,
         "chunk_tall_regions": args.chunk_tall_regions,
+        "layout_processing": not args.no_layout_processing,
     }
     if args.fallback:
         kw["fallback"] = args.fallback
@@ -95,11 +105,32 @@ def main():
         from newspaper_ocr.region_repair import RegionRepair
         repair = RegionRepair(recognizer=pipe.recognizer)
 
+    # ResidualOcr is likewise caller-invoked: analyze -> [repair] -> residual ->
+    # format. It masks the pass-1 boxes and re-OCRs leftover ink, so it also needs
+    # a region-level recognizer. Ordered after repair (repair cleans/dedups the
+    # boxes; residual then fills the true gaps between them).
+    residual = None
+    if args.residual_ocr:
+        # Residual blocks are column strips OCR'd whole, so the recognizer must be
+        # able to read a region crop: a RegionRecognizer, or a line recognizer that
+        # exposes recognize_region (e.g. Tesseract in region mode).
+        is_region = isinstance(pipe.recognizer, __import__(
+            "newspaper_ocr.recognizers.base", fromlist=["RegionRecognizer"]
+        ).RegionRecognizer)
+        if not (is_region or hasattr(pipe.recognizer, "recognize_region")):
+            ap.error("--residual-ocr needs a recognizer that can read a region "
+                     f"crop (e.g. glm-ocr, or tesseract); got {args.recognizer}")
+        from newspaper_ocr.residual_ocr import ResidualOcr
+        residual = ResidualOcr(recognizer=pipe.recognizer)
+
     def transcribe(img_path):
-        if repair is None:
+        if repair is None and residual is None:
             return pipe.ocr(img_path)
         layout = pipe.analyze(img_path)
-        layout = repair.repair(layout)
+        if repair is not None:
+            layout = repair.repair(layout)
+        if residual is not None:
+            layout = residual.recover(layout)
         return pipe.formatter.format(layout)
 
     out = HERE / "ocr-results" / args.name
