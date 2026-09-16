@@ -116,14 +116,19 @@ Higher is better. `overall` = 1 − CER (lowercased, alnum-only, order-sensitive
 `bowF1` = order-free bag-of-words F1. `$/100pg` is real API spend per 100 pages
 (**$0** for local models).
 
-| Detector | OCR | Residual | overall | cased | bowF1 | $/100pg |
+| Detector | OCR | newspaper-ocr | overall | cased | bowF1 | $/100pg |
 |:---|:---|:---:|:---:|:---:|:---:|:---:|
-| PaddleX | GLM-OCR | ✓ | **0.937** | **0.922** | **0.980** | $0.00 |
-| PaddleX | Gemini-flash-lite | ✓ | 0.936 | 0.915 | 0.944 | $4.51 |
-| PaddleX | GLM-OCR | — | 0.919 | 0.905 | 0.961 | $0.00 |
-| PaddleX | Tesseract | — | 0.899 | 0.874 | 0.891 | $0.00 |
-| none (whole page) | Gemini-flash-lite | — | 0.820 | 0.803 | 0.867 | $2.88 |
-| none (whole page) | Tesseract | — | 0.677 | 0.662 | 0.844 | $0.00 |
+| PaddleX | GLM-OCR | 0.7.0 | **0.937** | **0.922** | **0.980** | $0.00 |
+| PaddleX | Gemini-flash-lite | 0.7.0 | 0.936 | 0.915 | 0.944 | $4.51 |
+| PaddleX | GLM-OCR | 0.6.0 | 0.919 | 0.905 | 0.961 | $0.00 |
+| PaddleX | Tesseract | 0.7.0 | 0.899 | 0.874 | 0.891 | $0.00 |
+| none (whole page) | Gemini-flash-lite | 0.7.0 | 0.820 | 0.803 | 0.867 | $2.88 |
+| none (whole page) | Tesseract | 0.7.0 | 0.677 | 0.662 | 0.844 | $0.00 |
+
+newspaper-ocr **0.7.0** turns the residual second pass on by default for
+region-level recognizers (GLM-OCR, Gemini); **0.6.0** is the prior behavior. The
+version only changes the region-recognizer rows — Tesseract (line-level) and the
+whole-page runs are identical across versions.
 
 **Reading it.**
 - **The detector dominates.** Adding PaddleX layout detection is worth +0.22 for
@@ -132,9 +137,10 @@ Higher is better. `overall` = 1 − CER (lowercased, alnum-only, order-sensitive
   is the hard part.*
 - **PaddleX + GLM-OCR + residual is the recommended stack** and tops every column,
   with the widest `bowF1` lead (0.980) — it recovers and orders the most words.
-- **The residual second pass** ([newspaper-ocr](https://github.com/nealcaren/newspaper-ocr),
-  on by default for region recognizers in 0.7.0) lifts GLM-OCR 0.919 → 0.937 and
-  Gemini the same way — it recovers whole columns the detector missed.
+- **Upgrading [newspaper-ocr](https://github.com/nealcaren/newspaper-ocr) 0.6.0 →
+  0.7.0** (residual second pass on by default for region recognizers) lifts
+  GLM-OCR 0.919 → 0.937 and Gemini the same way — it recovers whole columns the
+  detector missed.
 - **`cased` keeps the ranking** and widens the gap to Tesseract (its weakness is
   punctuation, which the default `overall` metric ignores).
 
