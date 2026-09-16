@@ -122,13 +122,14 @@ Higher is better. `overall` = 1 − CER (lowercased, alnum-only, order-sensitive
 | PaddleX | Gemini-flash-lite | 0.7.0 | 0.936 | 0.915 | 0.944 | $4.51 |
 | PaddleX | GLM-OCR | 0.6.0 | 0.919 | 0.905 | 0.961 | $0.00 |
 | PaddleX | Tesseract | 0.7.0 | 0.899 | 0.874 | 0.891 | $0.00 |
-| none (whole page) | Gemini-flash-lite | 0.7.0 | 0.820 | 0.803 | 0.867 | $2.88 |
-| none (whole page) | Tesseract | 0.7.0 | 0.677 | 0.662 | 0.844 | $0.00 |
+| none (whole page) | Gemini-flash-lite |  | 0.820 | 0.803 | 0.867 | $2.88 |
+| none (whole page) | Tesseract |  | 0.677 | 0.662 | 0.844 | $0.00 |
 
-newspaper-ocr **0.7.0** turns the residual second pass on by default for
-region-level recognizers (GLM-OCR, Gemini); **0.6.0** is the prior behavior. The
-version only changes the region-recognizer rows — Tesseract (line-level) and the
-whole-page runs are identical across versions.
+The **whole-page rows use no detector** — the recognizer is handed the raw page,
+so newspaper-ocr isn't doing any layout work; these are the naive baseline (blank
+version). The `PaddleX` rows are the library's job. newspaper-ocr **0.7.0** turns
+the residual second pass on by default for region-level recognizers (GLM-OCR,
+Gemini); **0.6.0** is the prior behavior — the version only changes those rows.
 
 **Reading it.**
 - **The detector dominates.** Adding PaddleX layout detection is worth +0.22 for
