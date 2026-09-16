@@ -96,7 +96,7 @@ def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
         c = json.loads(cost_file.read_text())
         pages = c.get("pages") or len(allc)
         row["cost"] = c.get("reported_cost")
-        row["cost_per_page"] = (c["reported_cost"] / pages) if pages else None
+        row["cost_per_100"] = (c["reported_cost"] / pages * 100) if pages else None
         row["tok_out"] = int(c.get("completion_tokens") or 0)
         row["sec_per_page"] = (c["elapsed_s"] / pages) if c.get("elapsed_s") and pages else None
     return row
@@ -117,11 +117,11 @@ def main():
     rows.sort(key=lambda r: r["overall"], reverse=True)
 
     cols = ["model", "harness", "region", "overall", "cased", "broadsheet", "page", "chrF",
-            "bowF1", "gap", "cost", "cost_per_page", "tok_out", "n"]
+            "bowF1", "gap", "cost", "cost_per_100", "tok_out", "n"]
     hdr = ["model", "harness", "region", "overall", "cased", "broad", "page", "chrF",
-           "bowF1", "gap", "$", "$/pg", "out_tok", "n"]
+           "bowF1", "gap", "$", "$/100pg", "out_tok", "n"]
     specs = {"overall": ".3f", "cased": ".3f", "broadsheet": ".3f", "page": ".3f", "chrF": ".3f",
-             "bowF1": ".3f", "gap": ".3f", "cost": ".4f", "cost_per_page": ".4f",
+             "bowF1": ".3f", "gap": ".3f", "cost": ".4f", "cost_per_100": ".2f",
              "tok_out": "d", "n": "d"}
 
     def render_row(r):
