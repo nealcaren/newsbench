@@ -37,6 +37,10 @@ MANIFEST = HERE / "newsbench.csv"
 norm = lambda s: re.sub(r"[^0-9a-z]", "", s.lower())
 # lowercase, alnum + single spaces — for chrF (keeps word boundaries)
 norm_sp = lambda s: re.sub(r"\s+", " ", re.sub(r"[^0-9a-z ]", " ", s.lower())).strip()
+# case- AND punctuation-sensitive — for cased CER. The other metrics lowercase and
+# drop punctuation, which flatters engines weak at case/punctuation (e.g. Tesseract)
+# and gives VLMs no credit for getting them right; this keeps both.
+norm_cased = lambda s: re.sub(r"\s+", " ", re.sub(r"[^0-9A-Za-z .,;:!?'\"()-]", "", s)).strip()
 
 try:
     from rapidfuzz.distance import Levenshtein as _Lev
@@ -54,6 +58,14 @@ except ImportError:  # slow pure-python fallback
 
 def cer(ref: str, hyp: str) -> float:
     r, h = norm(ref), norm(hyp)
+    if not r:
+        return 0.0 if not h else 1.0
+    return _dist(r, h) / len(r)
+
+
+def cer_cased(ref: str, hyp: str) -> float:
+    """CER that keeps case and punctuation (see :data:`norm_cased`)."""
+    r, h = norm_cased(ref), norm_cased(hyp)
     if not r:
         return 0.0 if not h else 1.0
     return _dist(r, h) / len(r)

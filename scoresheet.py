@@ -9,12 +9,14 @@ LLM backends can be compared on accuracy AND price at once.
     python scoresheet.py --csv      # also write scoresheet.csv + scoresheet.md
 
 Quality columns mirror score.py (order-sensitive `overall`=1-CER, order-robust
-`chrF`/`bowF1`, `gap`=bowF1-overall). Cost columns are blank for local baselines
+`chrF`/`bowF1`, `gap`=bowF1-overall). `cased`=1-CER keeping case AND punctuation,
+which `overall` drops — the honest gap for engines that get case/punctuation right.
+Cost columns are blank for local baselines
 with no `_cost.json`. Scores are over the non-excluded pages (see newsbench.csv).
 """
 import argparse, csv as csvmod, json, re
 from pathlib import Path
-from score import cer, chrf, bow_f1, load_tiers, load_excludes, REF, RESULTS
+from score import cer, cer_cased, chrf, bow_f1, load_tiers, load_excludes, REF, RESULTS
 
 
 def config_of(name: str) -> str:
@@ -54,7 +56,7 @@ def display_name(name: str) -> str:
 
 
 def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
-    allc, fs, bows = [], [], []
+    allc, fs, bows, casedc = [], [], [], []
     by = {}
     for ref_file in sorted(REF.glob("*.txt")):
         if ref_file.stem in excludes:
@@ -66,6 +68,7 @@ def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
         h = hyp.read_text(encoding="utf-8", errors="ignore")
         c = cer(r, h)
         allc.append(c)
+        casedc.append(cer_cased(r, h))
         by.setdefault(tiers.get(ref_file.stem, "all"), []).append(c)
         fs.append(chrf(r, h))
         bows.append(bow_f1(r, h))
@@ -81,6 +84,7 @@ def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
         "config": config_of(folder.name),
         "n": len(allc),
         "overall": ov,
+        "cased": acc(casedc),
         "broadsheet": acc(by["broadsheet"]) if by.get("broadsheet") else None,
         "page": acc(by["page"]) if by.get("page") else None,
         "chrF": mean(fs),
@@ -112,11 +116,11 @@ def main():
             if f.is_dir() and (r := score_folder(f, tiers, excludes))]
     rows.sort(key=lambda r: r["overall"], reverse=True)
 
-    cols = ["model", "harness", "region", "overall", "broadsheet", "page", "chrF",
+    cols = ["model", "harness", "region", "overall", "cased", "broadsheet", "page", "chrF",
             "bowF1", "gap", "cost", "cost_per_page", "tok_out", "n"]
-    hdr = ["model", "harness", "region", "overall", "broad", "page", "chrF",
+    hdr = ["model", "harness", "region", "overall", "cased", "broad", "page", "chrF",
            "bowF1", "gap", "$", "$/pg", "out_tok", "n"]
-    specs = {"overall": ".3f", "broadsheet": ".3f", "page": ".3f", "chrF": ".3f",
+    specs = {"overall": ".3f", "cased": ".3f", "broadsheet": ".3f", "page": ".3f", "chrF": ".3f",
              "bowF1": ".3f", "gap": ".3f", "cost": ".4f", "cost_per_page": ".4f",
              "tok_out": "d", "n": "d"}
 
