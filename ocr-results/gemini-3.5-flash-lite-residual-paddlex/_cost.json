@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-3.5-flash-lite",
+  "config": "paddlex",
+  "pages": 19,
+  "elapsed_s": 531.3,
+  "requests": 1121,
+  "prompt_tokens": 1245390,
+  "completion_tokens": 197117,
+  "total_tokens": 1442507,
+  "cached_prompt_tokens": 0,
+  "reported_cost": 0.8577454049999989
+}

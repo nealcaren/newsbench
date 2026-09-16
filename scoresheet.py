@@ -91,6 +91,10 @@ def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
         "bowF1": bf,
         "gap": bf - ov,
     }
+    # Local models have no API cost — show $0 rather than blank. Hosted runs
+    # overwrite these from their _cost.json.
+    row["cost"] = 0.0
+    row["cost_per_100"] = 0.0
     cost_file = folder / "_cost.json"
     if cost_file.exists():
         c = json.loads(cost_file.read_text())

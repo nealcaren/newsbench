@@ -2,11 +2,11 @@
   "model": "google/gemini-3.5-flash-lite",
   "config": "wholepage",
   "pages": 19,
-  "elapsed_s": 1116.1,
+  "elapsed_s": 296.6,
   "requests": 30,
-  "prompt_tokens": 34667,
-  "completion_tokens": 222604,
-  "total_tokens": 257271,
+  "prompt_tokens": 34677,
+  "completion_tokens": 217140,
+  "total_tokens": 251817,
   "cached_prompt_tokens": 0,
-  "reported_cost": 0.5612409990000001
+  "reported_cost": 0.547720569
 }

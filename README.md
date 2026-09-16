@@ -109,50 +109,45 @@ Metal GPU. The PyTorch VLM backends do **not** work well here: LightOnOCR (mistr
 hard-aborts on MPS and is ~6× slower on CPU, and GLM-OCR's own `local` mode falls back to
 CPU (it disables MPS due to vision-position-id bugs). vLLM does not run on macOS.
 
-### Baseline results (`newspaper-ocr`, 19 pages)
+### Headline results (`newspaper-ocr`, n = 15)
 
-Higher is better. `overall` = 1 − CER (order-sensitive); `chrF` and `bowF1` are order-robust;
-`gap = bowF1 − overall` is the reading-order / segmentation penalty. `broadsheet` = pages
-≥ 4000 gold words, `page` = the rest.
+Higher is better. `overall` = 1 − CER (lowercased, alnum-only, order-sensitive);
+`cased` = 1 − CER keeping **case and punctuation** (the honest character score);
+`bowF1` = order-free bag-of-words F1. `$/100pg` is real API spend per 100 pages
+(**$0** for local models).
 
-| Backend | overall | broadsheet | page | chrF | bowF1 | gap |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| `tesseract` default (AS YOLO + Tesseract) | **0.615** | 0.579 | 0.646 | 0.692 | 0.704 | 0.089 |
-| `glm-ocr-mlx` (GLM-OCR 1.1B VLM) | 0.614 | 0.576 | 0.648 | 0.689 | **0.760** | 0.146 |
-| `news_combo_fast` (fine-tuned Tesseract) | 0.606 | 0.576 | 0.632 | 0.666 | 0.695 | 0.089 |
+| Detector | OCR | Residual | overall | cased | bowF1 | $/100pg |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|
+| PaddleX | GLM-OCR | ✓ | **0.937** | **0.922** | **0.980** | $0.00 |
+| PaddleX | Gemini-flash-lite | ✓ | 0.936 | 0.915 | 0.944 | $4.51 |
+| PaddleX | GLM-OCR | — | 0.919 | 0.905 | 0.961 | $0.00 |
+| PaddleX | Tesseract | — | 0.899 | 0.874 | 0.891 | $0.00 |
+| none (whole page) | Gemini-flash-lite | — | 0.820 | 0.803 | 0.867 | $2.88 |
+| none (whole page) | Tesseract | — | 0.677 | 0.662 | 0.844 | $0.00 |
 
-**Reading it.** On the headline CER (`overall`) all three tie at ~0.61 — by that metric the
-VLM does *not* beat Tesseract. But the split reveals why: on order-free `bowF1`, **GLM-OCR
-leads by ~5–6 points (0.760 vs ~0.70)** — it genuinely recognizes the words better. It gives
-that advantage back to reading order — its `gap` is 0.146 vs Tesseract's 0.089 — because the
-layout stage stitches the VLM's regions into the wrong sequence more often. So on these dense
-multi-column pages the VLM's bottleneck is **layout / reading order, not character
-recognition**, which is exactly the distinction the `chrF`/`bowF1`/`gap` columns exist to
-surface. Dense broadsheets (≥4000 words) cost every backend ~7 points versus shorter pages.
+**Reading it.**
+- **The detector dominates.** Adding PaddleX layout detection is worth +0.22 for
+  Tesseract (0.677 → 0.899) and +0.12 for Gemini (0.820 → 0.936) — far more than
+  the choice of recognizer. On these dense multi-column pages, *segmenting the page
+  is the hard part.*
+- **PaddleX + GLM-OCR + residual is the recommended stack** and tops every column,
+  with the widest `bowF1` lead (0.980) — it recovers and orders the most words.
+- **The residual second pass** ([newspaper-ocr](https://github.com/nealcaren/newspaper-ocr),
+  on by default for region recognizers in 0.7.0) lifts GLM-OCR 0.919 → 0.937 and
+  Gemini the same way — it recovers whole columns the detector missed.
+- **`cased` keeps the ranking** and widens the gap to Tesseract (its weakness is
+  punctuation, which the default `overall` metric ignores).
 
-_(A LightOnOCR-2-1B run was attempted but is CPU-only and ~6× slower here; not included.)_
-The gap of ~0.12–0.17 everywhere confirms that on multi-column newspapers, **sequencing
-is a bigger error source than character recognition** — which is the whole point of this
-benchmark.
+Regenerate the full table (all backends, tiers, tokens) with `python scoresheet.py`.
 
-Both Tesseract backends sit far below the 0.85–0.93 top vision-LLMs reach on the broader
-InkBench mix: dense newspaper layout is genuinely harder.
-
-**Notes.**
-- Page `2019713453-2578` (a *New York Weekly* page) is a near-total **layout-detection**
-  failure across all backends (they share the AS-YOLO detector), not a recognition
-  failure. It is kept as a real failure case.
-- Volunteer transcriptions are occasionally *partial* on dense ad-heavy pages, which
-  unfairly punishes any OCR tool; one such page was removed during construction. A quick
-  screen: a strong backend emitting far more text than the gold flags a likely partial
-  gold rather than a bad transcription.
-- Pages with a known-bad gold are flagged `exclude` in `newsbench.csv` and skipped by
-  `score.py` for every model (kept in `images/`+`txt/` for provenance). Currently
-  excluded: **`mss3413201856-40`** (Boston Daily Advertiser) — the gold ends mid-ad and
-  covers only ~half the page; all four OCR backends recover ~1.9× its word count of real,
-  coherent text. Cross-checking the gold word count against the independent OCR consensus
-  (`overall`/word-count outliers) is how such pages are found. Scores are therefore over
-  **18** pages.
+**Partial-gold exclusions.** Volunteer transcriptions are sometimes *partial* on
+dense ad-heavy pages, which unfairly punishes any OCR tool that reads the whole
+page. Such pages are flagged `exclude=partial_gold` in `newsbench.csv` and skipped
+by `score.py`/`scoresheet.py` for every model (kept in `images/`+`txt/` for
+provenance). A reliable screen: a strong backend emitting far more text than the
+gold flags a likely partial gold. Currently excluded (→ **n = 15**):
+`mss3413201856-40`, `mss3413201856-23`, `mss3413201776-3`, `mss83434402-9` — on each,
+OCR systems recover 1.3–1.8× the gold's word count of real, coherent text.
 
 ## Scoring another system
 
