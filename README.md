@@ -118,7 +118,8 @@ Higher is better. `overall` = 1 − CER (lowercased, alnum-only, order-sensitive
 
 | Detector | OCR | newspaper-ocr | overall | cased | bowF1 | $/100pg |
 |:---|:---|:---:|:---:|:---:|:---:|:---:|
-| PaddleX | GLM-OCR | 0.7.0 | **0.937** | **0.922** | **0.980** | $0.00 |
+| DocLayout-YOLO | GLM-OCR | 0.7.0 | **0.970** | **0.955** | **0.986** | $0.00 |
+| PaddleX | GLM-OCR | 0.7.0 | 0.937 | 0.922 | 0.980 | $0.00 |
 | PaddleX | Gemini-flash-lite | 0.7.0 | 0.936 | 0.915 | 0.944 | $4.51 |
 | PaddleX | GLM-OCR | 0.6.0 | 0.919 | 0.905 | 0.961 | $0.00 |
 | PaddleX | Tesseract | 0.7.0 | 0.899 | 0.874 | 0.891 | $0.00 |
@@ -136,12 +137,16 @@ Gemini); **0.6.0** is the prior behavior — the version only changes those rows
   Tesseract (0.677 → 0.899) and +0.12 for Gemini (0.820 → 0.936) — far more than
   the choice of recognizer. On these dense multi-column pages, *segmenting the page
   is the hard part.*
-- **PaddleX + GLM-OCR + residual is the recommended stack** and tops every column,
-  with the widest `bowF1` lead (0.980) — it recovers and orders the most words.
-- **Upgrading [newspaper-ocr](https://github.com/nealcaren/newspaper-ocr) 0.6.0 →
-  0.7.0** (residual second pass on by default for region recognizers) lifts
-  GLM-OCR 0.919 → 0.937 and Gemini the same way — it recovers whole columns the
-  detector missed.
+- **DocLayout-YOLO + GLM-OCR tops the sheet (0.970).** With the same recognizer,
+  swapping PaddleX → DocLayout-YOLO beats even PaddleX+residual (0.937): DocLayout
+  proposes finer, more complete regions (it caught columns PaddleX missed on the
+  hard pages) and its low `gap` (0.015) shows it also orders them best. It is
+  ~2× slower (more regions → more recognizer calls).
+- **The residual second pass rescues the weaker detector.** On PaddleX,
+  [newspaper-ocr](https://github.com/nealcaren/newspaper-ocr) 0.6.0 → 0.7.0
+  (residual on by default for region recognizers) lifts GLM-OCR 0.919 → 0.937 by
+  recovering the columns PaddleX missed. Under DocLayout it's a no-op — nothing is
+  left uncovered — so residual matters most for the dependency-light PaddleX path.
 - **`cased` keeps the ranking** and widens the gap to Tesseract (its weakness is
   punctuation, which the default `overall` metric ignores).
 

@@ -39,9 +39,11 @@ AS_YOLO = {"tesseract-default", "news_combo_fast", "glm-ocr-mlx"}
 
 
 def region_of(name: str) -> str:
-    """Detector / segmentation used: none (full page), PaddleX, or AS-YOLO."""
+    """Detector / segmentation used: none (full page), PaddleX, DocLayout, or AS-YOLO."""
     if name.endswith("-wholepage"):
         return "none"
+    if "doclayout" in name:
+        return "DocLayout"
     if name in AS_YOLO:
         return "AS-YOLO"
     return "PaddleX"                   # -paddlex runs + paddlex-*/lib-*/progmag-ppdoc baselines

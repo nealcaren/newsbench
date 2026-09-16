@@ -2,6 +2,7 @@
 
 | model | harness | region | overall | cased | broad | page | chrF | bowF1 | gap | $ | $/100pg | out_tok | n |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| glm-ocr-doclayout | newspaper-ocr | DocLayout | 0.970 | 0.955 | 0.976 | 0.967 | 0.986 | 0.986 | 0.015 | 0.0000 | 0.00 |  | 15 |
 | glm-ocr-residual | newspaper-ocr | PaddleX | 0.937 | 0.922 | 0.964 | 0.919 | 0.979 | 0.980 | 0.043 | 0.0000 | 0.00 |  | 15 |
 | gemini-3.5-flash-lite-residual | newspaper-ocr | PaddleX | 0.936 | 0.915 | 0.967 | 0.915 | 0.972 | 0.944 | 0.008 | 0.8577 | 4.51 | 197117 | 15 |
 | progmag-ppdoc-glm-repair | progmag-ocr | PaddleX | 0.924 | 0.910 | 0.973 | 0.891 | 0.956 | 0.965 | 0.041 | 0.0000 | 0.00 |  | 15 |
