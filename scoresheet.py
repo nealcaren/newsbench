@@ -44,7 +44,7 @@ def region_of(name: str) -> str:
         return "none"
     if "doclayout" in name:
         return "DocLayout"
-    if name in AS_YOLO:
+    if name in AS_YOLO or "asyolo" in name or "as_yolo" in name:
         return "AS-YOLO"
     return "PaddleX"                   # -paddlex runs + paddlex-*/lib-*/progmag-ppdoc baselines
 
