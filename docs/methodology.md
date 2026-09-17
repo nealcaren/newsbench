@@ -117,7 +117,7 @@ pip install mlx-vlm
 python -m mlx_vlm.server --model mlx-community/GLM-OCR-bf16 --port 8080
 ```
 
-On Apple Silicon this is the practical VLM path — GLM-OCR is ~1.1B params, and MLX uses the
+On Apple Silicon this is the practical VLM path — GLM-OCR is ~1.3B params, and MLX uses the
 Metal GPU. The PyTorch VLM backends do **not** work well on macOS: LightOnOCR (mistral3-based)
 hard-aborts on MPS and is ~6× slower on CPU, and GLM-OCR's `local` mode falls back to
 CPU. vLLM does not run on macOS.
