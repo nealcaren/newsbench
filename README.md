@@ -8,53 +8,66 @@ understanding and reading order**, the part that generic OCR benchmarks miss.
 > How well can an OCR system or vision LLM read a full newspaper page — every column,
 > in the right order — not just the one article a reader cares about?
 
-**Corpus:** 19 complete, long, original newspaper pages from Library of Congress
-[By the People](https://crowd.loc.gov/) crowd transcriptions (1850s–1919; 15 scored,
-4 excluded for partial gold). Every page ships with a volunteer gold transcription.
-Fully self-contained — everything needed to score a model lives here.
+Fully self-contained: the corpus, the gold transcriptions, and the scoring tools
+all live here. Bring your own OCR output and score it.
 
-See **[docs/methodology.md](docs/methodology.md)** for the corpus details, scoring
-metrics, the `newspaper-ocr` harness, and provenance.
+## The corpus
 
-## Results
+Nineteen **complete, long, original newspaper pages** from Library of Congress
+[By the People](https://crowd.loc.gov/) crowd transcriptions, each shipping with a
+volunteer gold-standard transcription.
 
-[`newspaper-ocr`](https://github.com/nealcaren/newspaper-ocr) v0.8.1, every combination
-of the two strong detectors × three recognizers, scored on the same GPU (n = 15).
-`overall` = 1 − CER (order-sensitive); `cased` keeps case + punctuation; `bowF1` is
-order-free bag-of-words F1. Higher is better; all local (no API cost).
+| Property | Value |
+|:---|:---|
+| Pages | 19 (15 scored; 4 excluded for partial gold) |
+| Publications | ~13 distinct papers (The Liberator, Boston Daily Advertiser, Hartford Daily Courant, Des Moines Register & Leader, and others) |
+| Eras | 1850s abolitionist broadsheets through 1919 |
+| Words per page | 1,892 – 8,966 (median ≈ 3,300) |
+| Total gold words | ~76,600 |
+| Every page | a complete edge-to-edge printed page, not a clipping or excerpt |
 
-| Detector | Recognizer | overall | cased | bowF1 |
-|:---|:---|:---:|:---:|:---:|
-| **DocLayout-YOLO** | PaddleOCR-VL | **0.970** | **0.953** | **0.985** |
-| **DocLayout-YOLO** | GLM-OCR | 0.959 | 0.943 | 0.985 |
-| **DocLayout-YOLO** | Tesseract | 0.919 | 0.889 | 0.910 |
-| AS-YOLO | PaddleOCR-VL | 0.816 | 0.801 | 0.937 |
-| AS-YOLO | GLM-OCR | 0.803 | 0.788 | 0.942 |
-| AS-YOLO | Tesseract | 0.620 | 0.602 | 0.706 |
+Pages were verified by eye to be true full newspaper sheets and required to carry a
+long gold transcription (≥ ~1,900 words). Four pages whose volunteer gold is only
+*partial* are flagged `exclude=partial_gold` in `newsbench.csv` and skipped by the
+scorers. See **[docs/methodology.md](docs/methodology.md)** for corpus selection,
+sourcing caveats, the exclusions, and provenance.
 
-**The detector is the whole game.** Holding the recognizer fixed and only swapping the
-detector moves the score more than anything else: +0.156 for GLM-OCR, +0.154 for
-PaddleOCR-VL, and **+0.30** for Tesseract. On dense multi-column pages, *segmenting the
-page correctly is harder than reading the type.*
+## Files
 
-- **DocLayout-YOLO wins** — it proposes finer, more complete regions, so even Tesseract
-  reaches 0.919, and the two VLMs are near-perfect peers (0.970 / 0.959).
-- **AS-YOLO caps the VLMs at ~0.81** despite bowF1 ~0.94 — the words are right, the
-  reading order isn't. That gap *is* the segmentation penalty.
-- **DocLayout-YOLO + Tesseract (0.919)** is a strong fully-local, free, no-VLM option.
+```
+images/            page scans (<id>.jpg), original LoC filenames
+txt/               matching volunteer gold transcriptions (<id>.txt)
+newsbench.csv      manifest: image_name, collection, words, tier, exclude, newspaper_note
+ocr-results/       one folder per system: <model-name>/<id>.txt
+```
 
-Hosted models (Gemini, GPT, etc.), cost/speed, and every historical run are in the full
-score sheet — regenerate with `python scoresheet.py` (see
-[docs/methodology.md](docs/methodology.md)).
+## Scoring tools
+
+```bash
+pip install -r requirements.txt   # rapidfuzz (fast); scipy for score.py --aligned
+```
+
+| Script | What it does |
+|:---|:---|
+| `score.py` | Per-model quality table: `overall` (1 − CER), `cased`, `chrF`, `bowF1`, and the reading-order `gap`. `--aligned` adds block-aligned CER. |
+| `scoresheet.py` | Combined sheet — quality + cost + speed, one row per `ocr-results/` folder. `--csv` writes `scoresheet.md` / `scoresheet.csv`. |
+| `score_order.py` | Word-level recall/precision + ordering-gap breakdown. |
+| `run_newspaper_ocr.py` | Runner that drives the [`newspaper-ocr`](https://github.com/nealcaren/newspaper-ocr) pipeline over `images/`. |
+
+Metrics are designed to separate **recognition** from **reading order**: plain CER
+punishes a correctly-read-but-mis-ordered page almost as hard as a misread one, so
+`chrF` (local n-grams) and `bowF1` (order-free) stay high when only the order is
+wrong, and `gap = bowF1 − overall` isolates the segmentation/ordering penalty. Full
+details in [docs/methodology.md](docs/methodology.md).
 
 ## Score your own system
 
-Write one plain-text file per page to `ocr-results/<your-model-name>/<id>.txt` (matching
-the image stem in `images/`), then:
+Write one plain-text file per page to `ocr-results/<your-model-name>/<id>.txt`
+(matching the image stem in `images/`), then:
 
 ```bash
-pip install -r requirements.txt   # rapidfuzz for fast scoring
-python score.py                   # auto-discovers every folder under ocr-results/
+python score.py        # auto-discovers every folder under ocr-results/
+python scoresheet.py   # combined quality/cost/speed sheet
 ```
 
 ## License
