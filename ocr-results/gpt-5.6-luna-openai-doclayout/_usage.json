@@ -1,0 +1,11 @@
+{
+  "model": "gpt-5.6-luna",
+  "pages": 19,
+  "elapsed_s": 2675.9,
+  "requests": 1029,
+  "prompt_tokens": 468959,
+  "completion_tokens": 663132,
+  "total_tokens": 1132091,
+  "cached_prompt_tokens": 0,
+  "reported_cost": 0.0
+}

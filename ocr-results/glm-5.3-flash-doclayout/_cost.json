@@ -1,0 +1,12 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "config": "doclayout",
+  "pages": 19,
+  "elapsed_s": 1575.0,
+  "requests": 1017,
+  "prompt_tokens": 504324,
+  "completion_tokens": 213307,
+  "total_tokens": 717631,
+  "cached_prompt_tokens": 8960,
+  "reported_cost": 0.14404960152
+}

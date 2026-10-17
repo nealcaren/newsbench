@@ -110,6 +110,25 @@ def bow_f1(ref: str, hyp: str) -> float:
     return 2 * P * R / (P + R) if (P + R) else 0.0
 
 
+def word_error_kinds(ref: str, hyp: str) -> tuple[int, int, int, int]:
+    """Order-free word-multiset error decomposition. Returns
+    ``(gold_words, missing, duplicate, novel)`` in word tokens:
+
+    - ``missing``   — gold words not covered by the hypothesis (recall loss).
+    - ``duplicate`` — words that *are* in gold but emitted too many times.
+    - ``novel``     — words absent from gold entirely (spurious / hallucinated).
+
+    Note both ``missing`` and ``novel`` absorb misspellings (a misread gold word
+    counts once as missing and once as novel), so low values on both also imply
+    fewer character-level misreads.
+    """
+    g, h = Counter(_tok.findall(ref.lower())), Counter(_tok.findall(hyp.lower()))
+    missing = sum(max(0, g[w] - h[w]) for w in g)
+    duplicate = sum(max(0, h[w] - g[w]) for w in g if w in h)
+    novel = sum(h[w] for w in h if w not in g)
+    return sum(g.values()), missing, duplicate, novel
+
+
 # ---- block-aligned CER (opt-in; character-level, order + reflow tolerant) ----
 def aligned_cer(ref: str, hyp: str) -> float:
     """For each gold paragraph, greedily claim its best-matching span anywhere in

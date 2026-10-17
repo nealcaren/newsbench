@@ -106,7 +106,8 @@ def whole_page_detector():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True, help="OpenRouter model id, e.g. deepseek/deepseek-v4.1-flash")
-    ap.add_argument("--config", required=True, choices=["wholepage", "paddlex"])
+    ap.add_argument("--config", required=True,
+                    choices=["wholepage", "paddlex", "doclayout"])
     ap.add_argument("--name", default=None, help="output folder (default: <model-tail>-<config>)")
     ap.add_argument("--max-tokens", type=int, default=16384,
                     help="output token cap; whole broadsheets need ~12k+")
@@ -133,6 +134,12 @@ def main():
     if args.config == "wholepage":
         pipe = Pipeline(detector=whole_page_detector(), recognizer=rec,
                         layout_processing=False, text_cleaning=False)
+    elif args.config == "doclayout":
+        # Current shipping harness: DocLayout-YOLO detector + region recognizer,
+        # with layout processing, text cleaning, and the residual pass all on by
+        # default (residual auto-enables for a RegionRecognizer). This is what a
+        # user gets today from Pipeline(detector="auto", recognizer=...).
+        pipe = Pipeline(detector="doclayout_yolo", recognizer=rec)
     else:
         pipe = Pipeline(detector="paddlex", recognizer=rec)
 

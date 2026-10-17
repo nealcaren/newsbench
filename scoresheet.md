@@ -1,44 +1,63 @@
 # NewsBench score sheet
 
-| model | harness | region | overall | cased | broad | page | chrF | bowF1 | gap | $ | $/100pg | out_tok | n |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| glm-ocr-doclayout | newspaper-ocr | DocLayout | 0.970 | 0.955 | 0.976 | 0.967 | 0.986 | 0.986 | 0.015 | 0.0000 | 0.00 |  | 15 |
-| ll-doclayout-pvl | newspaper-ocr | DocLayout | 0.970 | 0.953 | 0.972 | 0.968 | 0.986 | 0.985 | 0.015 | 0.0000 | 0.00 |  | 15 |
-| ll-doclayout-glm | newspaper-ocr | DocLayout | 0.959 | 0.943 | 0.974 | 0.949 | 0.987 | 0.985 | 0.027 | 0.0000 | 0.00 |  | 15 |
-| glm-ocr-residual | newspaper-ocr | PaddleX | 0.937 | 0.922 | 0.964 | 0.919 | 0.979 | 0.980 | 0.043 | 0.0000 | 0.00 |  | 15 |
-| gemini-3.5-flash-lite-residual | newspaper-ocr | PaddleX | 0.936 | 0.915 | 0.967 | 0.915 | 0.972 | 0.944 | 0.008 | 0.8577 | 4.51 | 197117 | 15 |
-| progmag-ppdoc-glm-repair | progmag-ocr | PaddleX | 0.924 | 0.910 | 0.973 | 0.891 | 0.956 | 0.965 | 0.041 | 0.0000 | 0.00 |  | 15 |
-| gpt-5.6-luna | newspaper-ocr | PaddleX | 0.921 | 0.898 | 0.974 | 0.885 | 0.941 | 0.928 | 0.007 | 0.0002 | 0.00 | 723904 | 15 |
-| deepseek-v4.1-flash | newspaper-ocr | PaddleX | 0.920 | 0.899 | 0.972 | 0.886 | 0.940 | 0.930 | 0.009 | 0.5181 | 2.73 | 565761 | 15 |
-| gemini-3.5-flash-lite | newspaper-ocr | PaddleX | 0.920 | 0.899 | 0.973 | 0.885 | 0.941 | 0.929 | 0.009 | 0.6471 | 3.41 | 124801 | 15 |
-| ll-doclayout-tess | newspaper-ocr | DocLayout | 0.919 | 0.889 | 0.934 | 0.910 | 0.958 | 0.910 | -0.009 | 0.0000 | 0.00 |  | 15 |
-| lib-chunk | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.969 | 0.886 | 0.947 | 0.961 | 0.043 | 0.0000 | 0.00 |  | 15 |
-| lib-paddlex-glm | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.969 | 0.886 | 0.947 | 0.961 | 0.043 | 0.0000 | 0.00 |  | 15 |
-| paddlex-glm | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.969 | 0.886 | 0.947 | 0.961 | 0.043 | 0.0000 | 0.00 |  | 15 |
-| res-glm-base | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.969 | 0.886 | 0.947 | 0.961 | 0.043 | 0.0000 | 0.00 |  | 15 |
-| mistral-small-2603 | newspaper-ocr | PaddleX | 0.917 | 0.899 | 0.971 | 0.881 | 0.944 | 0.944 | 0.027 | 0.1343 | 0.71 | 118448 | 15 |
-| res-tess-resid | newspaper-ocr | PaddleX | 0.917 | 0.890 | 0.958 | 0.889 | 0.949 | 0.905 | -0.011 | 0.0000 | 0.00 |  | 15 |
-| glm-5.3-flash | newspaper-ocr | PaddleX | 0.916 | 0.901 | 0.971 | 0.880 | 0.943 | 0.940 | 0.023 | 0.1318 | 0.69 | 218219 | 15 |
-| lib-fallback | newspaper-ocr | PaddleX | 0.915 | 0.901 | 0.969 | 0.880 | 0.947 | 0.960 | 0.045 | 0.0000 | 0.00 |  | 15 |
-| progmag-ppdoc-tesseract | progmag-ocr | PaddleX | 0.914 | 0.890 | 0.967 | 0.880 | 0.930 | 0.902 | -0.013 | 0.0000 | 0.00 |  | 15 |
-| paddlex-glm-repair | newspaper-ocr | PaddleX | 0.913 | 0.899 | 0.962 | 0.881 | 0.945 | 0.959 | 0.045 | 0.0000 | 0.00 |  | 15 |
-| qwen3.8-flash | newspaper-ocr | PaddleX | 0.907 | 0.887 | 0.965 | 0.868 | 0.931 | 0.924 | 0.017 | 0.1545 | 0.81 | 215766 | 15 |
-| lib-repair | newspaper-ocr | PaddleX | 0.906 | 0.892 | 0.961 | 0.869 | 0.939 | 0.954 | 0.048 | 0.0000 | 0.00 |  | 15 |
-| paddlex-tesseract | newspaper-ocr | PaddleX | 0.899 | 0.874 | 0.962 | 0.857 | 0.920 | 0.891 | -0.008 | 0.0000 | 0.00 |  | 15 |
-| res-tess-base | newspaper-ocr | PaddleX | 0.899 | 0.874 | 0.962 | 0.857 | 0.920 | 0.891 | -0.008 | 0.0000 | 0.00 |  | 15 |
-| claude-haiku-4.5 | newspaper-ocr | PaddleX | 0.894 | 0.874 | 0.964 | 0.848 | 0.937 | 0.917 | 0.023 | 1.0645 | 5.60 | 134382 | 15 |
-| gemma-3-27b-it | newspaper-ocr | PaddleX | 0.875 | 0.852 | 0.953 | 0.823 | 0.917 | 0.906 | 0.031 | 0.0627 | 0.33 | 124086 | 15 |
-| gemini-3.5-flash-lite | newspaper-ocr | none | 0.820 | 0.803 | 0.884 | 0.778 | 0.876 | 0.867 | 0.048 | 0.5477 | 2.88 | 217140 | 15 |
-| ll-asyolo-pvl | newspaper-ocr | AS-YOLO | 0.816 | 0.801 | 0.833 | 0.805 | 0.936 | 0.937 | 0.121 | 0.0000 | 0.00 |  | 15 |
-| ll-asyolo-glm | newspaper-ocr | AS-YOLO | 0.803 | 0.788 | 0.825 | 0.788 | 0.942 | 0.942 | 0.139 | 0.0000 | 0.00 |  | 15 |
-| tesseract | newspaper-ocr | none | 0.677 | 0.662 | 0.614 | 0.719 | 0.866 | 0.844 | 0.167 | 0.0000 | 0.00 |  | 15 |
-| tesseract-default | newspaper-ocr | AS-YOLO | 0.622 | 0.604 | 0.608 | 0.631 | 0.686 | 0.710 | 0.089 | 0.0000 | 0.00 |  | 15 |
-| ll-asyolo-tess | newspaper-ocr | AS-YOLO | 0.620 | 0.602 | 0.606 | 0.630 | 0.689 | 0.706 | 0.086 | 0.0000 | 0.00 |  | 15 |
-| news_combo_fast | newspaper-ocr | AS-YOLO | 0.617 | 0.601 | 0.603 | 0.627 | 0.669 | 0.711 | 0.094 | 0.0000 | 0.00 |  | 15 |
-| glm-ocr-mlx | newspaper-ocr | AS-YOLO | 0.607 | 0.596 | 0.574 | 0.629 | 0.671 | 0.750 | 0.143 | 0.0000 | 0.00 |  | 15 |
-| gpt-5.6-luna | newspaper-ocr | none | 0.503 | 0.490 | 0.378 | 0.587 | 0.690 | 0.730 | 0.226 | 0.0000 | 0.00 | 133143 | 15 |
-| qwen3.8-flash | newspaper-ocr | none | 0.341 | 0.332 | 0.185 | 0.446 | 0.349 | 0.362 | 0.021 | 0.0279 | 0.15 | 80352 | 15 |
-| lib-paddlex-glm-raw | newspaper-ocr | PaddleX | 0.291 | 0.293 | 0.253 | 0.317 | 0.946 | 0.952 | 0.660 | 0.0000 | 0.00 |  | 15 |
-| claude-haiku-4.5 | newspaper-ocr | none | 0.232 | 0.231 | 0.165 | 0.276 | 0.360 | 0.397 | 0.165 | 0.3060 | 1.61 | 53375 | 15 |
-| gemma-3-27b-it | newspaper-ocr | none | 0.226 | 0.223 | 0.187 | 0.252 | 0.339 | 0.356 | 0.130 | 0.0270 | 0.14 | 62568 | 15 |
-| mistral-small-2603 | newspaper-ocr | none | 0.202 | 0.199 | 0.118 | 0.258 | 0.314 | 0.358 | 0.156 | 0.0913 | 0.48 | 112627 | 15 |
+| model | harness | region | overall | cased | chrF | bowF1 | gap | miss | dup | novel | $/100pg | n |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| _smoke-mineru-mac | newspaper-ocr | PaddleX | 0.997 | 0.975 | 0.996 | 0.996 | -0.002 | 0.5% | 0.1% | 0.2% | 0.00 | 1 |
+| ensemble-mineru-dlholes | MinerU+npo | Ensemble | 0.975 | 0.959 | 0.989 | 0.985 | 0.010 | 1.5% | 0.8% | 0.8% | 0.00 | 15 |
+| gpt-5.6-luna | newspaper-ocr | DocLayout | 0.975 | 0.951 | 0.978 | 0.951 | -0.024 | 3.6% | 1.3% | 4.7% | 0.00 | 15 |
+| gpt-5.6-luna-openai | newspaper-ocr | DocLayout | 0.974 | 0.951 | 0.978 | 0.951 | -0.024 | 3.6% | 1.4% | 4.8% | 0.00 | 15 |
+| glm-ocr | newspaper-ocr | DocLayout | 0.970 | 0.955 | 0.986 | 0.986 | 0.015 | 1.9% | 0.6% | 0.5% | 0.00 | 15 |
+| ll-doclayout-pvl | newspaper-ocr | DocLayout | 0.970 | 0.953 | 0.986 | 0.985 | 0.015 | 1.8% | 0.7% | 0.7% | 0.00 | 15 |
+| ensemble-mineru-glmholes | MinerU+npo | Ensemble | 0.968 | 0.958 | 0.982 | 0.972 | 0.005 | 2.4% | 1.7% | 1.5% | 0.00 | 4 |
+| ll-wholepage-mineru | newspaper-ocr | none | 0.966 | 0.950 | 0.982 | 0.981 | 0.015 | 2.7% | 0.7% | 0.8% | 0.00 | 15 |
+| ll-doclayout-glm | newspaper-ocr | DocLayout | 0.959 | 0.943 | 0.987 | 0.985 | 0.027 | 1.7% | 0.8% | 0.5% | 0.00 | 15 |
+| mistral-small-2603 | newspaper-ocr | DocLayout | 0.958 | 0.938 | 0.982 | 0.967 | 0.009 | 2.6% | 1.2% | 2.7% | 0.82 | 15 |
+| gemini-3.5-flash-lite | newspaper-ocr | DocLayout | 0.958 | 0.936 | 0.978 | 0.950 | -0.008 | 3.5% | 1.4% | 4.9% | 2.41 | 15 |
+| deepseek-v4.1-flash | newspaper-ocr | DocLayout | 0.957 | 0.935 | 0.978 | 0.949 | -0.008 | 3.4% | 1.6% | 4.9% | 3.47 | 15 |
+| glm-5.3-flash | newspaper-ocr | DocLayout | 0.938 | 0.919 | 0.975 | 0.952 | 0.014 | 3.1% | 1.9% | 4.2% | 0.76 | 15 |
+| glm-ocr-residual | newspaper-ocr | PaddleX | 0.937 | 0.922 | 0.979 | 0.980 | 0.043 | 2.7% | 0.6% | 0.6% | 0.00 | 15 |
+| gemini-3.5-flash-lite-residual | newspaper-ocr | PaddleX | 0.936 | 0.915 | 0.972 | 0.944 | 0.008 | 4.2% | 1.6% | 5.0% | 4.51 | 15 |
+| progmag-ppdoc-glm-repair | progmag-ocr | PaddleX | 0.924 | 0.910 | 0.956 | 0.965 | 0.041 | 4.8% | 0.5% | 0.5% | 0.00 | 15 |
+| gpt-5.6-luna | newspaper-ocr | PaddleX | 0.921 | 0.898 | 0.941 | 0.928 | 0.007 | 7.4% | 1.0% | 4.4% | 0.00 | 15 |
+| gemma-3-27b-it | newspaper-ocr | DocLayout | 0.921 | 0.898 | 0.967 | 0.937 | 0.016 | 4.3% | 2.3% | 5.8% | 0.43 | 15 |
+| deepseek-v4.1-flash | newspaper-ocr | PaddleX | 0.920 | 0.899 | 0.940 | 0.930 | 0.009 | 7.5% | 0.9% | 4.2% | 2.73 | 15 |
+| gemini-3.5-flash-lite | newspaper-ocr | PaddleX | 0.920 | 0.899 | 0.941 | 0.929 | 0.009 | 7.3% | 1.0% | 4.4% | 3.41 | 15 |
+| ll-doclayout-tess | newspaper-ocr | DocLayout | 0.919 | 0.889 | 0.958 | 0.910 | -0.009 | 5.9% | 1.5% | 10.0% | 0.00 | 15 |
+| lib-chunk | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.947 | 0.961 | 0.043 | 5.8% | 0.4% | 0.4% | 0.00 | 15 |
+| lib-paddlex-glm | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.947 | 0.961 | 0.043 | 5.8% | 0.4% | 0.4% | 0.00 | 15 |
+| paddlex-glm | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.947 | 0.961 | 0.043 | 5.8% | 0.4% | 0.4% | 0.00 | 15 |
+| res-glm-base | newspaper-ocr | PaddleX | 0.919 | 0.905 | 0.947 | 0.961 | 0.043 | 5.8% | 0.4% | 0.4% | 0.00 | 15 |
+| mistral-small-2603 | newspaper-ocr | PaddleX | 0.917 | 0.899 | 0.944 | 0.944 | 0.027 | 6.6% | 0.9% | 2.3% | 0.71 | 15 |
+| res-tess-resid | newspaper-ocr | PaddleX | 0.917 | 0.890 | 0.949 | 0.905 | -0.011 | 7.4% | 1.3% | 9.5% | 0.00 | 15 |
+| glm-5.3-flash | newspaper-ocr | PaddleX | 0.916 | 0.901 | 0.943 | 0.940 | 0.023 | 6.6% | 0.9% | 2.9% | 0.69 | 15 |
+| lib-fallback | newspaper-ocr | PaddleX | 0.915 | 0.901 | 0.947 | 0.960 | 0.045 | 5.8% | 0.5% | 0.4% | 0.00 | 15 |
+| progmag-ppdoc-tesseract | progmag-ocr | PaddleX | 0.914 | 0.890 | 0.930 | 0.902 | -0.013 | 9.4% | 1.0% | 7.9% | 0.00 | 15 |
+| paddlex-glm-repair | newspaper-ocr | PaddleX | 0.913 | 0.899 | 0.945 | 0.959 | 0.045 | 6.1% | 0.6% | 0.4% | 0.00 | 15 |
+| qwen3.8-flash | newspaper-ocr | PaddleX | 0.907 | 0.887 | 0.931 | 0.924 | 0.017 | 8.6% | 0.7% | 4.2% | 0.81 | 15 |
+| lib-repair | newspaper-ocr | PaddleX | 0.906 | 0.892 | 0.939 | 0.954 | 0.048 | 6.6% | 0.5% | 0.4% | 0.00 | 15 |
+| paddlex-tesseract | newspaper-ocr | PaddleX | 0.899 | 0.874 | 0.920 | 0.891 | -0.008 | 10.3% | 1.0% | 8.6% | 0.00 | 15 |
+| res-tess-base | newspaper-ocr | PaddleX | 0.899 | 0.874 | 0.920 | 0.891 | -0.008 | 10.3% | 1.0% | 8.6% | 0.00 | 15 |
+| claude-haiku-4.5 | newspaper-ocr | PaddleX | 0.894 | 0.874 | 0.937 | 0.917 | 0.023 | 7.4% | 1.9% | 5.3% | 5.60 | 15 |
+| gemma-3-27b-it | newspaper-ocr | PaddleX | 0.875 | 0.852 | 0.917 | 0.906 | 0.031 | 9.8% | 1.3% | 5.2% | 0.33 | 15 |
+| dl-mineruocr | newspaper-ocr | PaddleX | 0.868 | 0.859 | 0.970 | 0.934 | 0.067 | 1.3% | 11.1% | 1.1% | 0.00 | 4 |
+| grid-doclayout-tess | newspaper-ocr | DocLayout | 0.835 | 0.807 | 0.947 | 0.886 | 0.051 | 5.0% | 9.7% | 8.9% | 0.00 | 4 |
+| gemini-3.5-flash-lite | newspaper-ocr | none | 0.820 | 0.803 | 0.876 | 0.867 | 0.048 | 14.0% | 1.7% | 4.3% | 2.88 | 15 |
+| ll-asyolo-pvl | newspaper-ocr | AS-YOLO | 0.816 | 0.801 | 0.936 | 0.937 | 0.121 | 8.4% | 2.2% | 1.8% | 0.00 | 15 |
+| grid-ensemble-tess | newspaper-ocr | PaddleX | 0.813 | 0.790 | 0.935 | 0.875 | 0.063 | 8.5% | 4.0% | 13.1% | 0.00 | 4 |
+| ll-asyolo-glm | newspaper-ocr | AS-YOLO | 0.803 | 0.788 | 0.942 | 0.942 | 0.139 | 7.3% | 2.7% | 1.2% | 0.00 | 15 |
+| grid-mineru-tess | newspaper-ocr | PaddleX | 0.788 | 0.766 | 0.916 | 0.863 | 0.075 | 11.6% | 3.4% | 12.9% | 0.00 | 4 |
+| tesseract | newspaper-ocr | none | 0.677 | 0.662 | 0.866 | 0.844 | 0.167 | 15.7% | 1.2% | 7.6% | 0.00 | 15 |
+| tesseract-default | newspaper-ocr | AS-YOLO | 0.622 | 0.604 | 0.686 | 0.710 | 0.089 | 37.2% | 0.6% | 8.7% | 0.00 | 15 |
+| ll-asyolo-tess | newspaper-ocr | AS-YOLO | 0.620 | 0.602 | 0.689 | 0.706 | 0.086 | 37.0% | 0.8% | 9.8% | 0.00 | 15 |
+| news_combo_fast | newspaper-ocr | AS-YOLO | 0.617 | 0.601 | 0.669 | 0.711 | 0.094 | 38.9% | 0.5% | 6.0% | 0.00 | 15 |
+| glm-ocr-mlx | newspaper-ocr | AS-YOLO | 0.607 | 0.596 | 0.671 | 0.750 | 0.143 | 37.9% | 0.1% | 0.5% | 0.00 | 15 |
+| ll-wholepage-dots | newspaper-ocr | none | 0.533 | 0.464 | 0.856 | 0.826 | 0.293 | 15.8% | 52.1% | 4.6% | 0.00 | 15 |
+| gpt-5.6-luna | newspaper-ocr | none | 0.503 | 0.490 | 0.690 | 0.730 | 0.226 | 39.9% | 3.8% | 1.8% | 0.00 | 15 |
+| qwen3.8-flash | newspaper-ocr | none | 0.341 | 0.332 | 0.349 | 0.362 | 0.021 | 70.9% | 0.4% | 1.1% | 0.15 | 15 |
+| lib-paddlex-glm-raw | newspaper-ocr | PaddleX | 0.291 | 0.293 | 0.946 | 0.952 | 0.660 | 5.5% | 2.7% | 0.4% | 0.00 | 15 |
+| claude-haiku-4.5 | newspaper-ocr | none | 0.232 | 0.231 | 0.360 | 0.397 | 0.165 | 73.7% | 2.6% | 6.3% | 1.61 | 15 |
+| gemma-3-27b-it | newspaper-ocr | none | 0.226 | 0.223 | 0.339 | 0.356 | 0.130 | 76.4% | 1.8% | 10.1% | 0.14 | 15 |
+| mistral-small-2603 | newspaper-ocr | none | 0.202 | 0.199 | 0.314 | 0.358 | 0.156 | 77.4% | 2.1% | 4.6% | 0.48 | 15 |
+| qwen3.8-flash | newspaper-ocr | DocLayout | 0.125 | 0.123 | 0.149 | 0.213 | 0.088 | 86.4% | 0.0% | 0.6% | 0.03 | 15 |
+| ll-wholepage-ovis | newspaper-ocr | none | -0.230 | -0.221 | 0.804 | 0.525 | 0.755 | 0.9% | 121.2% | 59.1% | 0.00 | 15 |
+| ll-wholepage-tele | newspaper-ocr | none | -0.322 | -0.334 | 0.179 | 0.153 | 0.476 | 84.9% | 85.2% | 17.9% | 0.00 | 15 |

@@ -1,0 +1,12 @@
+{
+  "model": "google/gemini-3.5-flash-lite",
+  "config": "doclayout",
+  "pages": 19,
+  "elapsed_s": 672.8,
+  "requests": 735,
+  "prompt_tokens": 819144,
+  "completion_tokens": 86388,
+  "total_tokens": 905532,
+  "cached_prompt_tokens": 0,
+  "reported_cost": 0.45709606800000024
+}
