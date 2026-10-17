@@ -24,7 +24,7 @@ hypothesis regardless of position, so it tolerates reordering AND text reflow.
 
 Uses rapidfuzz + scipy when available; falls back to pure-python otherwise (same numbers).
 """
-import csv, re
+import csv, re, unicodedata
 from collections import Counter
 from pathlib import Path
 
@@ -88,8 +88,14 @@ def dehyphenate(s: str) -> str:
 
 
 def load_text(path) -> str:
-    """Read a gold or hypothesis page, with line-break hyphens joined."""
-    return dehyphenate(Path(path).read_text(encoding="utf-8", errors="ignore"))
+    """Read a gold or hypothesis page, NFKC-normalized, with line-break hyphens joined.
+
+    NFKC turns vulgar fractions into digits ("47½" -> "471⁄2"), so a VLM's "½" and the
+    gold's ASCII "1/2" normalize alike instead of the "½" silently vanishing; it also
+    unfolds ligatures ("ﬁ" -> "fi").
+    """
+    text = Path(path).read_text(encoding="utf-8", errors="ignore")
+    return dehyphenate(unicodedata.normalize("NFKC", text))
 
 
 def cer(ref: str, hyp: str) -> float:

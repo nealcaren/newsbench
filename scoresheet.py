@@ -136,7 +136,10 @@ def main():
     tiers, excludes = load_tiers(), load_excludes()
     rows = [r for f in sorted(RESULTS.glob("*"))
             if f.is_dir() and not f.name.startswith("_") and (r := score_folder(f, tiers, excludes))]
-    rows.sort(key=lambda r: r["overall"], reverse=True)
+    # Runs that skipped scored pages aren't comparable (they dodge the hardest ones), so
+    # complete runs rank first and partial runs follow in their own block.
+    full = max((r["n"] for r in rows), default=0)
+    rows.sort(key=lambda r: (r["n"] < full, -r["overall"]))
 
     cols = ["model", "harness", "region", "overall", "cased", "chrF", "bowF1", "gap",
             "missing", "duplicate", "novel", "cost_per_100", "n"]
@@ -157,7 +160,10 @@ def main():
 
     md = ["| " + " | ".join(hdr) + " |",
           "|" + "|".join(["---"] * len(hdr)) + "|"]
-    for r in rows:
+    for i, r in enumerate(rows):
+        if r["n"] < full and (i == 0 or rows[i - 1]["n"] == full):
+            md.append("| " + " | ".join([f"**partial runs (n < {full}), not comparable**"]
+                                        + [""] * (len(hdr) - 1)) + " |")
         md.append("| " + " | ".join(render_row(r)) + " |")
     table = "\n".join(md)
     print(table)
