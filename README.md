@@ -19,21 +19,20 @@ volunteer gold-standard transcription.
 
 | Property | Value |
 |:---|:---|
-| Pages | 19 (15 scored; 4 excluded for partial gold) |
+| Pages | 19, all scored |
 | Publications | ~13 distinct papers (The Liberator, Boston Daily Advertiser, Hartford Daily Courant, Des Moines Register & Leader, and others) |
 | Eras | 1850s abolitionist broadsheets through 1919 |
 | Words per page | 1,892 – 8,966 (median ≈ 3,300) |
-| Total gold words | ~76,600 |
+| Total gold words | ~82,000 |
 | Every page | a complete edge-to-edge printed page, not a clipping or excerpt |
 
 Pages were verified by eye to be true full newspaper sheets and required to carry a
-long gold transcription (≥ ~1,900 words). Four pages whose volunteer gold is only
-*partial* are flagged `exclude=partial_gold` in `newsbench.csv` and skipped by the
-scorers. On the scored pages, 269 volunteer errors (typos, modernized spellings,
+long gold transcription (≥ ~1,900 words). Two pages whose volunteer gold covered only
+part of the page were completed from the scans, so all 19 are scored. 269 volunteer errors (typos, modernized spellings,
 skipped lines, duplicated passages) were corrected against the scans to a diplomatic
 standard; each is listed in [docs/gold-errata.csv](docs/gold-errata.csv). See
 **[docs/methodology.md](docs/methodology.md)** for corpus selection, sourcing caveats,
-the exclusions, the corrections, and provenance.
+the restored pages, the corrections, and provenance.
 
 ## Files
 

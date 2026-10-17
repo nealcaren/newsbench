@@ -77,11 +77,13 @@ the image stem), then run `python score.py`. Folders are auto-discovered — no 
 `newsbench.csv` (columns: `image_name, collection, words, tier, exclude, newspaper_note`)
 is the manifest. The `exclude` column is load-bearing: any row with a non-empty `exclude`
 is skipped by `score.py` for **every** model (via `load_excludes()`), so the comparison
-stays fair. Excluded pages are kept in `images/`+`txt/` for provenance. Four pages are
-excluded as `partial_gold` (volunteer transcribed only part of the page), so scores are
-over **15** pages. The reusable screen for partial-gold pages: compare a page's gold word
-count against the independent OCR consensus — a page where every backend emits far more
-coherent text than the gold is a suspect (see MEMO.md §1).
+stays fair. Excluded pages are kept in `images/`+`txt/` for provenance. **No page is
+excluded now** — all 19 are scored (the four former `partial_gold` pages were completed
+from the scans or found complete; methodology.md "Restored pages"). Partial-gold screen:
+compare a page's gold word count against OCR from systems that **don't double-read**
+(whole-page or PaddleX runs); DocLayout runs read overlapping boxes twice and make
+complete pages look partial. Runs missing any scored page are listed separately in the
+scoresheet as not comparable.
 
 ## The gold is corrected — edit it carefully
 
