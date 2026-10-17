@@ -29,14 +29,17 @@ volunteer gold-standard transcription.
 Pages were verified by eye to be true full newspaper sheets and required to carry a
 long gold transcription (≥ ~1,900 words). Four pages whose volunteer gold is only
 *partial* are flagged `exclude=partial_gold` in `newsbench.csv` and skipped by the
-scorers. See **[docs/methodology.md](docs/methodology.md)** for corpus selection,
-sourcing caveats, the exclusions, and provenance.
+scorers. On the scored pages, 269 volunteer errors (typos, modernized spellings,
+skipped lines, duplicated passages) were corrected against the scans to a diplomatic
+standard; each is listed in [docs/gold-errata.csv](docs/gold-errata.csv). See
+**[docs/methodology.md](docs/methodology.md)** for corpus selection, sourcing caveats,
+the exclusions, the corrections, and provenance.
 
 ## Files
 
 ```
 images/            page scans (<id>.jpg), original LoC filenames
-txt/               matching volunteer gold transcriptions (<id>.txt)
+txt/               matching gold transcriptions (<id>.txt), volunteer text with corrections
 newsbench.csv      manifest: image_name, collection, words, tier, exclude, newspaper_note
 ocr-results/       one folder per system: <model-name>/<id>.txt
 ```
@@ -57,8 +60,10 @@ pip install -r requirements.txt   # rapidfuzz (fast); scipy for score.py --align
 Metrics are designed to separate **recognition** from **reading order**: plain CER
 punishes a correctly-read-but-mis-ordered page almost as hard as a misread one, so
 `chrF` (local n-grams) and `bowF1` (order-free) stay high when only the order is
-wrong, and `gap = bowF1 − overall` isolates the segmentation/ordering penalty. Full
-details in [docs/methodology.md](docs/methodology.md).
+wrong, and `gap = bowF1 − overall` isolates the segmentation/ordering penalty.
+Line-break hyphens (`mus-` / `tered`) are joined in both gold and output before
+scoring, so engines that keep printed hyphenation aren't charged for it. Full details
+in [docs/methodology.md](docs/methodology.md).
 
 ## Score your own system
 
