@@ -75,6 +75,10 @@ python score.py        # auto-discovers every folder under ocr-results/
 python scoresheet.py   # combined quality/cost/speed sheet
 ```
 
+Folders starting with `_` (smoke tests, scratch runs) are ignored. The
+`human-volunteer-v1` row is the original volunteer transcription scored against the
+corrected gold, a reference ceiling rather than a system.
+
 ## License
 
 Code: [MIT](LICENSE). Page scans and gold transcriptions are U.S. Library of Congress

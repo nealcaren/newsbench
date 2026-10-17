@@ -2,6 +2,7 @@
 
 | model | harness | region | overall | cased | chrF | bowF1 | gap | miss | dup | novel | $/100pg | n |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
+| human-volunteer-v1 | human | none | 0.997 | 0.997 | 0.996 | 0.995 | -0.001 | 0.6% | 0.2% | 0.2% | 0.00 | 15 |
 | ensemble-mineru-dlholes | MinerU+npo | Ensemble | 0.978 | 0.962 | 0.991 | 0.989 | 0.010 | 1.2% | 0.5% | 0.7% | 0.00 | 15 |
 | gpt-5.6-luna | newspaper-ocr | DocLayout | 0.978 | 0.958 | 0.992 | 0.989 | 0.012 | 1.1% | 0.5% | 0.5% | 0.00 | 15 |
 | gpt-5.6-luna-openai | newspaper-ocr | DocLayout | 0.978 | 0.958 | 0.991 | 0.989 | 0.012 | 1.1% | 0.5% | 0.5% | 0.00 | 15 |

@@ -76,11 +76,13 @@ volunteer added (*by the Virginia planter* for *by a*), passages typed twice, pr
 lines the volunteer skipped, missing headlines and datelines, and line-end dashes typed
 as hyphens (*throb-* for *throb—*), which the scorer would otherwise join with the next
 word. Disputed but unchanged: the masthead date on `mss3413201283-24` (1913 or 1919;
-the last digit is broken).
+the last digit is broken, and OCR splits 1919/1913/1918; a clipping pasted on the page is
+hand-dated "Fri. Jan 10, 1913").
 
 Effect: every system's `overall` rises by about 0.003 and `bowF1` by about 0.004; the
-ranking does not change. The original volunteer text is in git history (before the
-commit that adds `gold-errata.csv`).
+ranking does not change. The original volunteer text (gold v1) is kept as a scored row,
+`ocr-results/human-volunteer-v1/`: against the corrected gold it gets `overall` 0.997 and
+`bowF1` 0.995, which is the size of the correction and a ceiling no system reaches.
 
 ## Files
 
@@ -98,7 +100,7 @@ score_order.py     detailed order-sensitive vs order-free word breakdown
 ## Scoring
 
 ```bash
-pip install -r requirements.txt   # rapidfuzz (+ scipy for --aligned); optional but fast
+pip install -r requirements.txt   # rapidfuzz (+ scipy for --aligned); optional
 
 python score.py            # main table
 python score.py --aligned  # add block-aligned CER (slower, char-level order-removed)
@@ -125,6 +127,11 @@ from recognition failures. `score_order.py` decomposes further into bag-of-words
 (coverage) and precision (spurious text). `cased` keeps case and punctuation, which the
 default `overall` metric strips — it doesn't change the ranking but widens the gap to
 engines weak at punctuation (e.g. Tesseract).
+
+Without rapidfuzz, `score.py` falls back to an exact bit-parallel (Myers/Hyyrö) edit
+distance in pure Python, so the numbers are identical and the largest broadsheets still
+finish in about a second each. Folders under `ocr-results/` whose name starts with `_`
+(smoke tests, scratch runs) are skipped by every scorer.
 
 **Line-break hyphens.** Before any metric, a hyphen at the end of a line is joined to
 the next line's word in both the gold and the output (`load_text` in `score.py`). Many
