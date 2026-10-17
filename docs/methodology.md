@@ -75,9 +75,10 @@ fixed: volunteer typos and misreadings (*press* for *persons*, *chair* for *chai
 volunteer added (*by the Virginia planter* for *by a*), passages typed twice, printed
 lines the volunteer skipped, missing headlines and datelines, and line-end dashes typed
 as hyphens (*throb-* for *throb—*), which the scorer would otherwise join with the next
-word. Disputed but unchanged: the masthead date on `mss3413201283-24` (1913 or 1919;
-the last digit is broken, and OCR splits 1919/1913/1918; a clipping pasted on the page is
-hand-dated "Fri. Jan 10, 1913").
+word. The masthead year on `mss3413201283-24` is kept as 1913: the last digit is broken
+(OCR splits 1919/1913/1918), but the article calls Wilson "a historian" rather than
+President, never mentions the World War, and a clipping pasted on the page, about the
+then-new Woman Suffrage Party of Providence, is hand-dated "Fri. Jan 10, 1913".
 
 Effect: every system's `overall` rises by about 0.003 and `bowF1` by about 0.004; the
 ranking does not change. The original volunteer text (gold v1) is kept as a scored row,
