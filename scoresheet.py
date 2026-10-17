@@ -16,7 +16,8 @@ with no `_cost.json`. Scores are over the non-excluded pages (see newsbench.csv)
 """
 import argparse, csv as csvmod, json, re
 from pathlib import Path
-from score import cer, cer_cased, chrf, bow_f1, load_tiers, load_excludes, REF, RESULTS
+from score import (cer, cer_cased, chrf, bow_f1, word_error_kinds, load_text,
+                   load_tiers, load_excludes, REF, RESULTS)
 
 
 def config_of(name: str) -> str:
@@ -29,8 +30,12 @@ def config_of(name: str) -> str:
 
 def harness_of(name: str) -> str:
     """Which OCR pipeline produced the folder."""
+    if name.startswith("human"):
+        return "human"                # original volunteer transcription (pre-correction gold)
     if name.startswith("progmag"):
         return "progmag-ocr"          # external progressive-magazines-ocr
+    if name.startswith("ensemble"):
+        return "MinerU+npo"           # MinerU base + newspaper-ocr hole patching
     return "newspaper-ocr"
 
 
@@ -40,7 +45,11 @@ AS_YOLO = {"tesseract-default", "news_combo_fast", "glm-ocr-mlx"}
 
 def region_of(name: str) -> str:
     """Detector / segmentation used: none (full page), PaddleX, DocLayout, or AS-YOLO."""
-    if name.endswith("-wholepage"):
+    if name.startswith("human"):
+        return "none"
+    if name.startswith("ensemble"):
+        return "Ensemble"             # MinerU layout ∪ DocLayout holes
+    if name.endswith("-wholepage") or "wholepage" in name:
         return "none"
     if "doclayout" in name:
         return "DocLayout"
@@ -51,7 +60,7 @@ def region_of(name: str) -> str:
 
 def display_name(name: str) -> str:
     """Strip the config suffix; the Region column now carries that info."""
-    for suf in ("-wholepage", "-paddlex"):
+    for suf in ("-wholepage", "-paddlex", "-doclayout"):
         if name.endswith(suf):
             return name[: -len(suf)]
     return name
@@ -59,6 +68,7 @@ def display_name(name: str) -> str:
 
 def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
     allc, fs, bows, casedc = [], [], [], []
+    gw = mw = dw = nw = 0
     by = {}
     for ref_file in sorted(REF.glob("*.txt")):
         if ref_file.stem in excludes:
@@ -66,14 +76,16 @@ def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
         hyp = folder / ref_file.name
         if not hyp.exists():
             continue
-        r = ref_file.read_text(encoding="utf-8", errors="ignore")
-        h = hyp.read_text(encoding="utf-8", errors="ignore")
+        r = load_text(ref_file)
+        h = load_text(hyp)
         c = cer(r, h)
         allc.append(c)
         casedc.append(cer_cased(r, h))
         by.setdefault(tiers.get(ref_file.stem, "all"), []).append(c)
         fs.append(chrf(r, h))
         bows.append(bow_f1(r, h))
+        g, m, d, n = word_error_kinds(r, h)
+        gw += g; mw += m; dw += d; nw += n
     if not allc:
         return None
     acc = lambda xs: 1 - sum(xs) / len(xs)
@@ -92,6 +104,10 @@ def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
         "chrF": mean(fs),
         "bowF1": bf,
         "gap": bf - ov,
+        # Order-free word-multiset error kinds, as a fraction of gold words.
+        "missing": mw / gw if gw else None,
+        "duplicate": dw / gw if gw else None,
+        "novel": nw / gw if gw else None,
     }
     # Local models have no API cost — show $0 rather than blank. Hosted runs
     # overwrite these from their _cost.json.
@@ -119,16 +135,16 @@ def main():
 
     tiers, excludes = load_tiers(), load_excludes()
     rows = [r for f in sorted(RESULTS.glob("*"))
-            if f.is_dir() and (r := score_folder(f, tiers, excludes))]
+            if f.is_dir() and not f.name.startswith("_") and (r := score_folder(f, tiers, excludes))]
     rows.sort(key=lambda r: r["overall"], reverse=True)
 
-    cols = ["model", "harness", "region", "overall", "cased", "broadsheet", "page", "chrF",
-            "bowF1", "gap", "cost", "cost_per_100", "tok_out", "n"]
-    hdr = ["model", "harness", "region", "overall", "cased", "broad", "page", "chrF",
-           "bowF1", "gap", "$", "$/100pg", "out_tok", "n"]
+    cols = ["model", "harness", "region", "overall", "cased", "chrF", "bowF1", "gap",
+            "missing", "duplicate", "novel", "cost_per_100", "n"]
+    hdr = ["model", "harness", "region", "overall", "cased", "chrF", "bowF1", "gap",
+           "miss", "dup", "novel", "$/100pg", "n"]
     specs = {"overall": ".3f", "cased": ".3f", "broadsheet": ".3f", "page": ".3f", "chrF": ".3f",
-             "bowF1": ".3f", "gap": ".3f", "cost": ".4f", "cost_per_100": ".2f",
-             "tok_out": "d", "n": "d"}
+             "bowF1": ".3f", "gap": ".3f", "missing": ".1%", "duplicate": ".1%", "novel": ".1%",
+             "cost": ".4f", "cost_per_100": ".2f", "tok_out": "d", "n": "d"}
 
     def render_row(r):
         out = []

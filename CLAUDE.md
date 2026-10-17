@@ -77,15 +77,32 @@ the image stem), then run `python score.py`. Folders are auto-discovered — no 
 `newsbench.csv` (columns: `image_name, collection, words, tier, exclude, newspaper_note`)
 is the manifest. The `exclude` column is load-bearing: any row with a non-empty `exclude`
 is skipped by `score.py` for **every** model (via `load_excludes()`), so the comparison
-stays fair. Excluded pages are kept in `images/`+`txt/` for provenance. Current exclusion:
-`mss3413201856-40` (partial gold — volunteer transcribed only ~half the page). Scores are
-therefore over **18** pages, not 19. The reusable screen for partial-gold pages: compare a
-page's gold word count against the independent OCR consensus — a page where every backend
-emits far more coherent text than the gold is a suspect (see MEMO.md §1).
+stays fair. Excluded pages are kept in `images/`+`txt/` for provenance. Four pages are
+excluded as `partial_gold` (volunteer transcribed only part of the page), so scores are
+over **15** pages. The reusable screen for partial-gold pages: compare a page's gold word
+count against the independent OCR consensus — a page where every backend emits far more
+coherent text than the gold is a suspect (see MEMO.md §1).
 
-## Known issue
+## The gold is corrected — edit it carefully
 
-`overall` (global Levenshtein CER) is O(n·m) and can hang on the largest ~9,000-word
-broadsheets (~55k normalized chars). `bowF1`/`chrF` are unaffected. If `score.py` prints
-the header then appears to hang, this is why. MEMO.md §2 details fix options (length-guarded
-/ chunked CER using the existing `aligned_cer` machinery, or a max-distance cutoff).
+The scored pages' volunteer text was corrected against the scans (269 edits, Oct 2026).
+Every edit is in `docs/gold-errata.csv`; every candidate checked, including the ones where
+the gold was right, is in `docs/gold-audit.csv`. Rules for any further change:
+
+- **Diplomatic standard**: the gold follows the print — period spellings (*defence*),
+  dialect (*aout*), printer's misprints (*hnman*, *wiliing*) and printed numerals. Don't
+  "fix" these; `gold-audit.csv` lists misprints already confirmed on the scan.
+- Change the gold only after checking the scan, and add a row to `gold-errata.csv`.
+- The `txt/` files use **CRLF** line endings; read/write with `newline=""` to keep them.
+- Scoring joins line-end hyphens (`load_text` in `score.py`), so a line-end dash in the
+  gold must be an em dash (`throb—`), not a hyphen, or it merges with the next word.
+
+## Scorer notes
+
+- The old `overall` hang on the ~55k-char broadsheets (MEMO.md §2) was the pure-python
+  O(n·m) Levenshtein fallback, used when rapidfuzz isn't installed. It is now an exact
+  bit-parallel (Myers/Hyyrö) implementation: same numbers as rapidfuzz, ~1 s per big page.
+- Folders under `ocr-results/` starting with `_` are skipped by `score.py`,
+  `scoresheet.py` and `score_order.py` — use that prefix for smoke tests.
+- `ocr-results/human-volunteer-v1/` is the pre-correction volunteer gold (v1), scored as
+  a reference row. Don't edit it; it's what `docs/gold-errata.csv` was applied to.

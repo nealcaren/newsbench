@@ -48,11 +48,48 @@ Currently excluded (→ **n = 15**): `mss3413201856-40`, `mss3413201856-23`,
 `mss3413201776-3`, `mss83434402-9` — on each, OCR systems recover 1.3–1.8× the gold's
 word count of real, coherent text.
 
+### Gold corrections (2026-10)
+
+The volunteer transcriptions are good but not perfect. On the 15 scored pages, 269
+spots were corrected against the scans (191 replacements, 46 deletions, 32 insertions;
+every one listed with its context and evidence in
+[`gold-errata.csv`](gold-errata.csv)). Two pages hold half of them: `mss3413201417-29`
+(75) and `mss3413201628-41` (60, a dialect-humour page).
+
+**How they were found.** Eight independent systems (MinerU, gpt-5.6-luna,
+PaddleOCR-VL, GLM-OCR, gemini, mistral, deepseek, Tesseract) were word-aligned to the
+gold after reordering each output to the gold's order. A spot became a candidate when
+at least five of the eight agreed on the same reading against the gold, when the gold
+had words no system produced, or when at least three systems produced text the gold
+lacked. All 411 candidates were then checked against crops of the page scan (each
+verdict, with its evidence, is in [`gold-audit.csv`](gold-audit.csv)); 126 turned
+out to be gold-correct (mostly text the systems read twice, or printer's misprints the
+gold had kept), and 4 were unreadable and left alone. Only spots confirmed on the scan
+were changed, so a system gains nothing just for agreeing with the others.
+
+**Standard: diplomatic.** The gold now follows the print: period spellings
+(*defence*, *practise*, *counsellor*, *pedlar*), dialect spellings (*aout*, *minits*),
+printer's misprints (*hnman*, *belieing*, *wiliing*) and the printed numerals. What was
+fixed: volunteer typos and misreadings (*press* for *persons*, *chair* for *chain*,
+*priority* for *propriety*, *woolen* for *women*), modernized spellings, words the
+volunteer added (*by the Virginia planter* for *by a*), passages typed twice, printed
+lines the volunteer skipped, missing headlines and datelines, and line-end dashes typed
+as hyphens (*throb-* for *throb—*), which the scorer would otherwise join with the next
+word. The masthead year on `mss3413201283-24` is kept as 1913: the last digit is broken
+(OCR splits 1919/1913/1918), but the article calls Wilson "a historian" rather than
+President, never mentions the World War, and a clipping pasted on the page, about the
+then-new Woman Suffrage Party of Providence, is hand-dated "Fri. Jan 10, 1913".
+
+Effect: every system's `overall` rises by about 0.003 and `bowF1` by about 0.004; the
+ranking does not change. The original volunteer text (gold v1) is kept as a scored row,
+`ocr-results/human-volunteer-v1/`: against the corrected gold it gets `overall` 0.997 and
+`bowF1` 0.995, which is the size of the correction and a ceiling no system reaches.
+
 ## Files
 
 ```
 images/            page scans (<id>.jpg), original LoC filenames
-txt/               matching volunteer gold transcriptions (<id>.txt)
+txt/               matching gold transcriptions (<id>.txt): volunteer text, corrected per gold-errata.csv
 newsbench.csv      manifest: image_name, collection, words, tier, exclude, newspaper_note
 ocr-results/       one folder per system: <model-name>/<id>.txt
 run_newspaper_ocr.py   runner for the newspaper-ocr pipeline
@@ -64,7 +101,7 @@ score_order.py     detailed order-sensitive vs order-free word breakdown
 ## Scoring
 
 ```bash
-pip install -r requirements.txt   # rapidfuzz (+ scipy for --aligned); optional but fast
+pip install -r requirements.txt   # rapidfuzz (+ scipy for --aligned); optional
 
 python score.py            # main table
 python score.py --aligned  # add block-aligned CER (slower, char-level order-removed)
@@ -91,6 +128,18 @@ from recognition failures. `score_order.py` decomposes further into bag-of-words
 (coverage) and precision (spurious text). `cased` keeps case and punctuation, which the
 default `overall` metric strips — it doesn't change the ranking but widens the gap to
 engines weak at punctuation (e.g. Tesseract).
+
+Without rapidfuzz, `score.py` falls back to an exact bit-parallel (Myers/Hyyrö) edit
+distance in pure Python, so the numbers are identical and the largest broadsheets still
+finish in about a second each. Folders under `ocr-results/` whose name starts with `_`
+(smoke tests, scratch runs) are skipped by every scorer.
+
+**Line-break hyphens.** Before any metric, a hyphen at the end of a line is joined to
+the next line's word in both the gold and the output (`load_text` in `score.py`). Many
+VLMs keep the printed hyphenation (`mus-` / `tered`) while the gold joins the word, and
+without this each hyphenated line end counted as one missing word plus two novel ones,
+about 0.035 bowF1 for the hosted VLMs. The alphanumeric `overall` CER was never
+affected.
 
 ## Testing the `newspaper-ocr` library
 

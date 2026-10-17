@@ -1,0 +1,12 @@
+{
+  "model": "google/gemma-3-27b-it",
+  "config": "doclayout",
+  "pages": 19,
+  "elapsed_s": 1273.8,
+  "requests": 1014,
+  "prompt_tokens": 306228,
+  "completion_tokens": 142325,
+  "total_tokens": 448553,
+  "cached_prompt_tokens": 2304,
+  "reported_cost": 0.08192646593999998
+}

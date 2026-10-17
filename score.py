@@ -22,7 +22,7 @@ hypothesis regardless of position, so it tolerates reordering AND text reflow.
 
     python newsbench/score.py [--aligned]
 
-Uses rapidfuzz + scipy when available; falls back to slower pure-python otherwise.
+Uses rapidfuzz + scipy when available; falls back to pure-python otherwise (same numbers).
 """
 import csv, re
 from collections import Counter
@@ -45,15 +45,51 @@ norm_cased = lambda s: re.sub(r"\s+", " ", re.sub(r"[^0-9A-Za-z .,;:!?'\"()-]", 
 try:
     from rapidfuzz.distance import Levenshtein as _Lev
     _dist = _Lev.distance
-except ImportError:  # slow pure-python fallback
+except ImportError:
+    # Pure-python fallback: exact Levenshtein via Myers/Hyyrö bit-parallelism, with the
+    # whole DP column held in one Python int. The textbook O(n·m) loop never finished on
+    # the ~55k-char broadsheets (the old "score.py hangs" bug); this does them in seconds.
     def _dist(r, h):
-        prev = list(range(len(h) + 1))
-        for i, rc in enumerate(r, 1):
-            cur = [i] + [0] * len(h)
-            for j, hc in enumerate(h, 1):
-                cur[j] = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (rc != hc))
-            prev = cur
-        return prev[-1]
+        if len(r) < len(h):
+            r, h = h, r
+        m = len(h)
+        if not m:
+            return len(r)
+        peq = {}
+        for i, c in enumerate(h):
+            peq[c] = peq.get(c, 0) | (1 << i)
+        mask, top = (1 << m) - 1, 1 << (m - 1)
+        vp, vn, d = mask, 0, m
+        for c in r:
+            eq = peq.get(c, 0)
+            xv = eq | vn
+            xh = (((eq & vp) + vp) ^ vp) | eq
+            hp = vn | (~(xh | vp) & mask)
+            hn = vp & xh
+            if hp & top:
+                d += 1
+            elif hn & top:
+                d -= 1
+            hp = ((hp << 1) | 1) & mask
+            hn = (hn << 1) & mask
+            vp = hn | (~(xv | hp) & mask)
+            vn = hp & xv
+        return d
+
+
+# Line-break hyphenation ("mus-\ntered"): many VLMs preserve it while the volunteer
+# gold joins the word, which split one gold word into two "novel" tokens and cost
+# hosted VLMs ~0.035 bowF1. Joined on both sides before every metric.
+_LINEBREAK_HYPHEN = re.compile(r"(\w)[-\u00ac\u2010\u2011]\s*\n\s*(\w)")
+
+
+def dehyphenate(s: str) -> str:
+    return _LINEBREAK_HYPHEN.sub(r"\1\2", s)
+
+
+def load_text(path) -> str:
+    """Read a gold or hypothesis page, with line-break hyphens joined."""
+    return dehyphenate(Path(path).read_text(encoding="utf-8", errors="ignore"))
 
 
 def cer(ref: str, hyp: str) -> float:
@@ -110,6 +146,25 @@ def bow_f1(ref: str, hyp: str) -> float:
     return 2 * P * R / (P + R) if (P + R) else 0.0
 
 
+def word_error_kinds(ref: str, hyp: str) -> tuple[int, int, int, int]:
+    """Order-free word-multiset error decomposition. Returns
+    ``(gold_words, missing, duplicate, novel)`` in word tokens:
+
+    - ``missing``   — gold words not covered by the hypothesis (recall loss).
+    - ``duplicate`` — words that *are* in gold but emitted too many times.
+    - ``novel``     — words absent from gold entirely (spurious / hallucinated).
+
+    Note both ``missing`` and ``novel`` absorb misspellings (a misread gold word
+    counts once as missing and once as novel), so low values on both also imply
+    fewer character-level misreads.
+    """
+    g, h = Counter(_tok.findall(ref.lower())), Counter(_tok.findall(hyp.lower()))
+    missing = sum(max(0, g[w] - h[w]) for w in g)
+    duplicate = sum(max(0, h[w] - g[w]) for w in g if w in h)
+    novel = sum(h[w] for w in h if w not in g)
+    return sum(g.values()), missing, duplicate, novel
+
+
 # ---- block-aligned CER (opt-in; character-level, order + reflow tolerant) ----
 def aligned_cer(ref: str, hyp: str) -> float:
     """For each gold paragraph, greedily claim its best-matching span anywhere in
@@ -164,7 +219,7 @@ def main():
 
     tiers = load_tiers()
     excludes = load_excludes()
-    models = sorted(p for p in RESULTS.glob("*") if p.is_dir()) if RESULTS.exists() else []
+    models = sorted(p for p in RESULTS.glob("*") if p.is_dir() and not p.name.startswith("_")) if RESULTS.exists() else []
     if not models:
         print("No model folders in newsbench/ocr-results/. Run run_newspaper_ocr.py first.")
         return
@@ -181,8 +236,8 @@ def main():
             hyp_file = m / ref_file.name
             if not hyp_file.exists():
                 continue
-            rtext = ref_file.read_text(encoding="utf-8", errors="ignore")
-            htext = hyp_file.read_text(encoding="utf-8", errors="ignore")
+            rtext = load_text(ref_file)
+            htext = load_text(hyp_file)
             allc.append(cer(rtext, htext))
             t = tiers.get(ref_file.stem, tier_names[0])
             by.setdefault(t, []).append(allc[-1])
