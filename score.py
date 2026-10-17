@@ -22,7 +22,7 @@ hypothesis regardless of position, so it tolerates reordering AND text reflow.
 
     python newsbench/score.py [--aligned]
 
-Uses rapidfuzz + scipy when available; falls back to slower pure-python otherwise.
+Uses rapidfuzz + scipy when available; falls back to pure-python otherwise (same numbers).
 """
 import csv, re
 from collections import Counter
@@ -45,15 +45,36 @@ norm_cased = lambda s: re.sub(r"\s+", " ", re.sub(r"[^0-9A-Za-z .,;:!?'\"()-]", 
 try:
     from rapidfuzz.distance import Levenshtein as _Lev
     _dist = _Lev.distance
-except ImportError:  # slow pure-python fallback
+except ImportError:
+    # Pure-python fallback: exact Levenshtein via Myers/Hyyrö bit-parallelism, with the
+    # whole DP column held in one Python int. The textbook O(n·m) loop never finished on
+    # the ~55k-char broadsheets (the old "score.py hangs" bug); this does them in seconds.
     def _dist(r, h):
-        prev = list(range(len(h) + 1))
-        for i, rc in enumerate(r, 1):
-            cur = [i] + [0] * len(h)
-            for j, hc in enumerate(h, 1):
-                cur[j] = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (rc != hc))
-            prev = cur
-        return prev[-1]
+        if len(r) < len(h):
+            r, h = h, r
+        m = len(h)
+        if not m:
+            return len(r)
+        peq = {}
+        for i, c in enumerate(h):
+            peq[c] = peq.get(c, 0) | (1 << i)
+        mask, top = (1 << m) - 1, 1 << (m - 1)
+        vp, vn, d = mask, 0, m
+        for c in r:
+            eq = peq.get(c, 0)
+            xv = eq | vn
+            xh = (((eq & vp) + vp) ^ vp) | eq
+            hp = vn | (~(xh | vp) & mask)
+            hn = vp & xh
+            if hp & top:
+                d += 1
+            elif hn & top:
+                d -= 1
+            hp = ((hp << 1) | 1) & mask
+            hn = (hn << 1) & mask
+            vp = hn | (~(xv | hp) & mask)
+            vn = hp & xv
+        return d
 
 
 # Line-break hyphenation ("mus-\ntered"): many VLMs preserve it while the volunteer
@@ -198,7 +219,7 @@ def main():
 
     tiers = load_tiers()
     excludes = load_excludes()
-    models = sorted(p for p in RESULTS.glob("*") if p.is_dir()) if RESULTS.exists() else []
+    models = sorted(p for p in RESULTS.glob("*") if p.is_dir() and not p.name.startswith("_")) if RESULTS.exists() else []
     if not models:
         print("No model folders in newsbench/ocr-results/. Run run_newspaper_ocr.py first.")
         return

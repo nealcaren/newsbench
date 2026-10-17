@@ -39,6 +39,11 @@ Impact: dropping it raised the strongest backend from bowF1 0.950 (19pp) to
 
 ## 2. Fix the scorer — `overall` (CER) hangs on the largest pages
 
+> **Resolved 2026-10-17.** The hang was the pure-python O(n·m) fallback, hit whenever
+> rapidfuzz isn't installed (rapidfuzz itself handles these pages fine). The fallback is
+> now an exact bit-parallel Levenshtein (Myers/Hyyrö on Python ints): identical
+> distances to rapidfuzz, ~1 s on the largest page. No cutoff or chunking was needed.
+
 `score.py`'s headline metric `overall = 1 − CER` uses a global Levenshtein edit
 distance. That's **O(n·m)**, and on a full ~9,000-word broadsheet (~55k
 normalized chars) a single page doesn't finish in a reasonable time. Symptom:

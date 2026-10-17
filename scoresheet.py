@@ -30,6 +30,8 @@ def config_of(name: str) -> str:
 
 def harness_of(name: str) -> str:
     """Which OCR pipeline produced the folder."""
+    if name.startswith("human"):
+        return "human"                # original volunteer transcription (pre-correction gold)
     if name.startswith("progmag"):
         return "progmag-ocr"          # external progressive-magazines-ocr
     if name.startswith("ensemble"):
@@ -43,6 +45,8 @@ AS_YOLO = {"tesseract-default", "news_combo_fast", "glm-ocr-mlx"}
 
 def region_of(name: str) -> str:
     """Detector / segmentation used: none (full page), PaddleX, DocLayout, or AS-YOLO."""
+    if name.startswith("human"):
+        return "none"
     if name.startswith("ensemble"):
         return "Ensemble"             # MinerU layout ∪ DocLayout holes
     if name.endswith("-wholepage") or "wholepage" in name:
@@ -131,7 +135,7 @@ def main():
 
     tiers, excludes = load_tiers(), load_excludes()
     rows = [r for f in sorted(RESULTS.glob("*"))
-            if f.is_dir() and (r := score_folder(f, tiers, excludes))]
+            if f.is_dir() and not f.name.startswith("_") and (r := score_folder(f, tiers, excludes))]
     rows.sort(key=lambda r: r["overall"], reverse=True)
 
     cols = ["model", "harness", "region", "overall", "cased", "chrF", "bowF1", "gap",

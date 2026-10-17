@@ -97,9 +97,12 @@ the gold was right, is in `docs/gold-audit.csv`. Rules for any further change:
 - Scoring joins line-end hyphens (`load_text` in `score.py`), so a line-end dash in the
   gold must be an em dash (`throb—`), not a hyphen, or it merges with the next word.
 
-## Known issue
+## Scorer notes
 
-`overall` (global Levenshtein CER) is O(n·m) and can hang on the largest ~9,000-word
-broadsheets (~55k normalized chars). `bowF1`/`chrF` are unaffected. If `score.py` prints
-the header then appears to hang, this is why. MEMO.md §2 details fix options (length-guarded
-/ chunked CER using the existing `aligned_cer` machinery, or a max-distance cutoff).
+- The old `overall` hang on the ~55k-char broadsheets (MEMO.md §2) was the pure-python
+  O(n·m) Levenshtein fallback, used when rapidfuzz isn't installed. It is now an exact
+  bit-parallel (Myers/Hyyrö) implementation: same numbers as rapidfuzz, ~1 s per big page.
+- Folders under `ocr-results/` starting with `_` are skipped by `score.py`,
+  `scoresheet.py` and `score_order.py` — use that prefix for smoke tests.
+- `ocr-results/human-volunteer-v1/` is the pre-correction volunteer gold (v1), scored as
+  a reference row. Don't edit it; it's what `docs/gold-errata.csv` was applied to.

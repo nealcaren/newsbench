@@ -63,7 +63,7 @@ def bow(ref_w, hyp_w):
 
 
 def main():
-    models = sorted(p for p in RESULTS.glob("*") if p.is_dir())
+    models = sorted(p for p in RESULTS.glob("*") if p.is_dir() and not p.name.startswith("_"))
     if not models:
         print("No model folders in ocr-results/.")
         return
