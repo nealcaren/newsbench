@@ -56,6 +56,21 @@ except ImportError:  # slow pure-python fallback
         return prev[-1]
 
 
+# Line-break hyphenation ("mus-\ntered"): many VLMs preserve it while the volunteer
+# gold joins the word, which split one gold word into two "novel" tokens and cost
+# hosted VLMs ~0.035 bowF1. Joined on both sides before every metric.
+_LINEBREAK_HYPHEN = re.compile(r"(\w)[-\u00ac\u2010\u2011]\s*\n\s*(\w)")
+
+
+def dehyphenate(s: str) -> str:
+    return _LINEBREAK_HYPHEN.sub(r"\1\2", s)
+
+
+def load_text(path) -> str:
+    """Read a gold or hypothesis page, with line-break hyphens joined."""
+    return dehyphenate(Path(path).read_text(encoding="utf-8", errors="ignore"))
+
+
 def cer(ref: str, hyp: str) -> float:
     r, h = norm(ref), norm(hyp)
     if not r:
@@ -200,8 +215,8 @@ def main():
             hyp_file = m / ref_file.name
             if not hyp_file.exists():
                 continue
-            rtext = ref_file.read_text(encoding="utf-8", errors="ignore")
-            htext = hyp_file.read_text(encoding="utf-8", errors="ignore")
+            rtext = load_text(ref_file)
+            htext = load_text(hyp_file)
             allc.append(cer(rtext, htext))
             t = tiers.get(ref_file.stem, tier_names[0])
             by.setdefault(t, []).append(allc[-1])

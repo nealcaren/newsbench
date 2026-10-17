@@ -21,6 +21,8 @@ import re
 from collections import Counter
 from pathlib import Path
 
+from score import load_text
+
 HERE = Path(__file__).resolve().parent
 REF = HERE / "txt"
 RESULTS = HERE / "ocr-results"
@@ -77,8 +79,8 @@ def main():
     for m in models:
         wa = rr = pp = ff = 0.0
         for name in common:
-            rw = words((REF / name).read_text(errors="ignore"))
-            hw = words((m / name).read_text(errors="ignore"))
+            rw = words(load_text(REF / name))
+            hw = words(load_text(m / name))
             wa += max(0.0, 1 - wer(rw, hw))
             P, R, F = bow(rw, hw)
             rr += R; pp += P; ff += F

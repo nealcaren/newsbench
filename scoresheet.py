@@ -16,7 +16,7 @@ with no `_cost.json`. Scores are over the non-excluded pages (see newsbench.csv)
 """
 import argparse, csv as csvmod, json, re
 from pathlib import Path
-from score import (cer, cer_cased, chrf, bow_f1, word_error_kinds,
+from score import (cer, cer_cased, chrf, bow_f1, word_error_kinds, load_text,
                    load_tiers, load_excludes, REF, RESULTS)
 
 
@@ -72,8 +72,8 @@ def score_folder(folder: Path, tiers: dict, excludes: set) -> dict | None:
         hyp = folder / ref_file.name
         if not hyp.exists():
             continue
-        r = ref_file.read_text(encoding="utf-8", errors="ignore")
-        h = hyp.read_text(encoding="utf-8", errors="ignore")
+        r = load_text(ref_file)
+        h = load_text(hyp)
         c = cer(r, h)
         allc.append(c)
         casedc.append(cer_cased(r, h))
