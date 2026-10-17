@@ -2,7 +2,6 @@
 
 | model | harness | region | overall | cased | chrF | bowF1 | gap | miss | dup | novel | $/100pg | n |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| _smoke-mineru-mac | newspaper-ocr | PaddleX | 0.999 | 0.976 | 0.998 | 0.997 | -0.002 | 0.4% | 0.1% | 0.2% | 0.00 | 1 |
 | ensemble-mineru-dlholes | MinerU+npo | Ensemble | 0.978 | 0.962 | 0.991 | 0.989 | 0.010 | 1.2% | 0.5% | 0.7% | 0.00 | 15 |
 | gpt-5.6-luna | newspaper-ocr | DocLayout | 0.978 | 0.958 | 0.992 | 0.989 | 0.012 | 1.1% | 0.5% | 0.5% | 0.00 | 15 |
 | gpt-5.6-luna-openai | newspaper-ocr | DocLayout | 0.978 | 0.958 | 0.991 | 0.989 | 0.012 | 1.1% | 0.5% | 0.5% | 0.00 | 15 |

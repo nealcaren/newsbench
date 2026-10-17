@@ -77,11 +77,25 @@ the image stem), then run `python score.py`. Folders are auto-discovered — no 
 `newsbench.csv` (columns: `image_name, collection, words, tier, exclude, newspaper_note`)
 is the manifest. The `exclude` column is load-bearing: any row with a non-empty `exclude`
 is skipped by `score.py` for **every** model (via `load_excludes()`), so the comparison
-stays fair. Excluded pages are kept in `images/`+`txt/` for provenance. Current exclusion:
-`mss3413201856-40` (partial gold — volunteer transcribed only ~half the page). Scores are
-therefore over **18** pages, not 19. The reusable screen for partial-gold pages: compare a
-page's gold word count against the independent OCR consensus — a page where every backend
-emits far more coherent text than the gold is a suspect (see MEMO.md §1).
+stays fair. Excluded pages are kept in `images/`+`txt/` for provenance. Four pages are
+excluded as `partial_gold` (volunteer transcribed only part of the page), so scores are
+over **15** pages. The reusable screen for partial-gold pages: compare a page's gold word
+count against the independent OCR consensus — a page where every backend emits far more
+coherent text than the gold is a suspect (see MEMO.md §1).
+
+## The gold is corrected — edit it carefully
+
+The scored pages' volunteer text was corrected against the scans (269 edits, Oct 2026).
+Every edit is in `docs/gold-errata.csv`; every candidate checked, including the ones where
+the gold was right, is in `docs/gold-audit.csv`. Rules for any further change:
+
+- **Diplomatic standard**: the gold follows the print — period spellings (*defence*),
+  dialect (*aout*), printer's misprints (*hnman*, *wiliing*) and printed numerals. Don't
+  "fix" these; `gold-audit.csv` lists misprints already confirmed on the scan.
+- Change the gold only after checking the scan, and add a row to `gold-errata.csv`.
+- The `txt/` files use **CRLF** line endings; read/write with `newline=""` to keep them.
+- Scoring joins line-end hyphens (`load_text` in `score.py`), so a line-end dash in the
+  gold must be an em dash (`throb—`), not a hyphen, or it merges with the next word.
 
 ## Known issue
 

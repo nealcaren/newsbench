@@ -61,7 +61,8 @@ PaddleOCR-VL, GLM-OCR, gemini, mistral, deepseek, Tesseract) were word-aligned t
 gold after reordering each output to the gold's order. A spot became a candidate when
 at least five of the eight agreed on the same reading against the gold, when the gold
 had words no system produced, or when at least three systems produced text the gold
-lacked. All 411 candidates were then checked against crops of the page scan; 126 turned
+lacked. All 411 candidates were then checked against crops of the page scan (each
+verdict, with its evidence, is in [`gold-audit.csv`](gold-audit.csv)); 126 turned
 out to be gold-correct (mostly text the systems read twice, or printer's misprints the
 gold had kept), and 4 were unreadable and left alone. Only spots confirmed on the scan
 were changed, so a system gains nothing just for agreeing with the others.
